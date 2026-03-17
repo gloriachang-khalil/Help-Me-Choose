@@ -1601,4 +1601,225 @@
         };
 
         const rules = b.rules.slice();
-      
+        const candidates = [];
+
+        for (const r of rules) {
+          const m = r.match || {};
+          let ok = true;
+
+          if (branchKey === "iphone") {
+            const budget = m.budget;
+            const care = m.care;
+            const nb = normalizeMatchValue(budget ?? "*");
+            const nc = normalizeMatchValue(care ?? "*");
+            if (!nb.any && nb.value && nb.value !== q2) ok = false;
+            if (!nb.any && nb.list && !nb.list.includes(q2)) ok = false;
+            if (!nc.any && nc.value && nc.value !== q3) ok = false;
+            if (!nc.any && nc.list && !nc.list.includes(q3)) ok = false;
+          } else if (branchKey === "macbook") {
+            const usage = m.usage;
+            const tilt = m.tilt;
+            const nu = normalizeMatchValue(usage ?? "*");
+            const nt = normalizeMatchValue(tilt ?? "*");
+            if (!nu.any && nu.value && nu.value !== q2) ok = false;
+            if (!nu.any && nu.list && !nu.list.includes(q2)) ok = false;
+            if (!nt.any && nt.value && nt.value !== q3) ok = false;
+            if (!nt.any && nt.list && !nt.list.includes(q3)) ok = false;
+          } else {
+            const device = m.device;
+            const care = m.care;
+            const nd = normalizeMatchValue(device ?? "*");
+            const nc = normalizeMatchValue(care ?? "*");
+            if (!nd.any && nd.value && nd.value !== q2) ok = false;
+            if (!nd.any && nd.list && !nd.list.includes(q2)) ok = false;
+            if (!nc.any && nc.value && nc.value !== q3) ok = false;
+            if (!nc.any && nc.list && !nc.list.includes(q3)) ok = false;
+          }
+
+          if (ok) candidates.push(r);
+        }
+
+        candidates.sort((a, b2) => ruleScore(b2) - ruleScore(a));
+        const picked = candidates[0] || b.rules[0];
+
+        const why = buildWhy(ctx, picked);
+
+        return {
+          branch: branchKey,
+          q2,
+          q3,
+          primary: picked.primary,
+          alt: picked.alt,
+          tag: picked.tag,
+          accessories: picked.accessories || [],
+          compareFields: b.compareFields,
+          compare: picked.compare || {},
+          why,
+        };
+      }
+
+      function buildWhy(ctx, pickedRule) {
+        for (const t of COPY.whyTemplates) {
+          if (t.when(ctx)) return t.text;
+        }
+        const a = ctx.q2;
+        const c = ctx.q3;
+        if (ctx.branch === "iphone") {
+          return `你选择了 ${a} 的预算，并更在意「${c}」。${pickedRule.primary.name} 在这个组合里更均衡：既能覆盖核心体验，也更适合长期使用。`;
+        }
+        if (ctx.branch === "macbook") {
+          return `你的主要用途是「${a}」，取向是「${c}」。这意味着你更需要在尺寸与性能之间找到匹配的平衡，${pickedRule.primary.name} 更贴合这个优先级。`;
+        }
+        return `你更在意「${c}」，设备侧重「${a}」。${pickedRule.primary.name} 在连接与体验上更贴合你的高频场景，用起来更省心。`;
+      }
+
+      function renderResult(m) {
+        el.resultSub.textContent = buildResultSubtitle(m);
+        el.reasonTag.textContent = m.tag ? `推荐理由：${m.tag}` : "推荐理由";
+        el.primaryName.textContent = m.primary.name;
+        el.primaryPrice.textContent = m.primary.price;
+        el.primaryBullets.innerHTML = (m.primary.bullets || []).map((x) => `<li>${escapeHtml(x)}</li>`).join("");
+        el.primaryWhy.textContent = m.why;
+
+        el.altName.textContent = m.alt.name;
+        el.altPrice.textContent = m.alt.price;
+        el.altDiff.textContent = m.alt.diff;
+
+        el.accessoryGrid.innerHTML = (m.accessories || [])
+          .slice(0, 3)
+          .map((a) => {
+            return `
+              <div class="card mini" aria-label="配件推荐">
+                <p class="miniTitle">${escapeHtml(a.name)}</p>
+                <p class="miniDesc">${escapeHtml(a.why)}</p>
+              </div>
+            `;
+          })
+          .join("");
+
+        renderCompare(m);
+        state.compareOpen = false;
+        el.compareWrap.classList.remove("open");
+        el.btnCompare.textContent = "对比主推 vs 备选";
+      }
+
+      function buildResultSubtitle(m) {
+        const branchLabel = PRODUCTS[m.branch]?.label || "产品";
+        if (m.branch === "iphone") {
+          return `基于你想选购的 ${branchLabel} 与你的偏好，我们为你整理了更适合的主推、备选与配件建议。`;
+        }
+        if (m.branch === "macbook") {
+          return `基于你的使用场景与取向，我们为你整理了更适合的 ${branchLabel} 主推、备选与配件建议。`;
+        }
+        return `基于你的选择，我们为你整理了更适合的 ${branchLabel} 主推、备选与配件建议。`;
+      }
+
+      function renderCompare(m) {
+        if (el.thPrimary) el.thPrimary.textContent = m.primary?.name || "主推";
+        if (el.thAlt) el.thAlt.textContent = m.alt?.name || "备选";
+        const fields = m.compareFields || [];
+        el.compareBody.innerHTML = fields
+          .map((f) => {
+            const row = m.compare?.[f] || ["—", "—"];
+            const left = row[0] ?? "—";
+            const right = row[1] ?? "—";
+            return `
+              <tr>
+                <td><strong>${escapeHtml(f)}</strong></td>
+                <td>${escapeHtml(left)}</td>
+                <td>${escapeHtml(right)}</td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function openModal(text) {
+        el.saveText.value = text;
+        el.modalOverlay.classList.add("show");
+        setTimeout(() => {
+          el.saveText.focus();
+          el.saveText.select();
+        }, 50);
+      }
+
+      function closeModal() {
+        el.modalOverlay.classList.remove("show");
+      }
+
+      function buildSaveSummary(m) {
+        return `我在 Help Me Choose 中得到了推荐：${m.primary.name}（${m.primary.price}），适合更看重「${m.q3}」且在「${m.q2}」这个选择下的用户，备选是 ${m.alt.name}（${m.alt.price}）。推荐搭配 ${m.accessories.map((x) => x.name).slice(0, 3).join(" 和 ")}。`;
+      }
+
+      function resetAll() {
+        state.step = "welcome";
+        state.branch = null;
+        state.answers = { q1: null, q2: null, q3: null };
+        state.compareOpen = false;
+        state.matched = null;
+        el.compareWrap.classList.remove("open");
+        showScreen("welcome");
+        setProgress("welcome");
+      }
+
+      // Bind actions
+      el.btnStart.addEventListener("click", () => {
+        renderQ1();
+        showScreen("q1");
+      });
+
+      el.btnStore.addEventListener("click", () => {
+        alert("这里是 Apple Store 查看按钮占位。你可以在正式版本里替换为真实链接。");
+      });
+
+      el.btnCompare.addEventListener("click", () => {
+        state.compareOpen = !state.compareOpen;
+        el.compareWrap.classList.toggle("open", state.compareOpen);
+        el.btnCompare.textContent = state.compareOpen ? "收起对比" : "对比主推 vs 备选";
+      });
+
+      el.btnSave.addEventListener("click", () => {
+        if (!state.matched) return;
+        openModal(buildSaveSummary(state.matched));
+      });
+
+      el.linkRestart.addEventListener("click", (e) => {
+        e.preventDefault();
+        resetAll();
+      });
+
+      el.btnCloseModal.addEventListener("click", closeModal);
+      el.modalOverlay.addEventListener("click", (e) => {
+        if (e.target === el.modalOverlay) closeModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && el.modalOverlay.classList.contains("show")) closeModal();
+      });
+
+      el.btnSelectAll.addEventListener("click", () => {
+        el.saveText.focus();
+        el.saveText.select();
+      });
+
+      el.btnCopy.addEventListener("click", async () => {
+        const text = el.saveText.value;
+        try {
+          await navigator.clipboard.writeText(text);
+          el.btnCopy.textContent = "已复制";
+          setTimeout(() => (el.btnCopy.textContent = "复制摘要"), 900);
+        } catch {
+          el.saveText.focus();
+          el.saveText.select();
+          document.execCommand("copy");
+          el.btnCopy.textContent = "已复制";
+          setTimeout(() => (el.btnCopy.textContent = "复制摘要"), 900);
+        }
+      });
+
+      // Init
+      setProgress("welcome");
+      showScreen("welcome");
+    })();
+  </script>
+</body>
+</html>
