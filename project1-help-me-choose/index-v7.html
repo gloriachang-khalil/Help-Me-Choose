@@ -68,10 +68,10 @@
     .mini:hover{transform:none;box-shadow:none;}
     .miniTitle{margin:0;font-weight:800;letter-spacing:-0.01em;font-size:15px;}
     .miniDesc{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5;}
-    .miniFooter{margin-top:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .miniFooter{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
     .sectionTitle{margin:18px 0 10px;font-size:15px;font-weight:800;letter-spacing:-0.01em;color:rgba(29,29,31,.92);}
     .compareWrap{overflow:hidden;max-height:0;opacity:0;transform:translateY(-6px);transition:max-height .35s ease,opacity .25s ease,transform .25s ease;}
-    .compareWrap.open{opacity:1;transform:translateY(0);max-height:1000px;}
+    .compareWrap.open{opacity:1;transform:translateY(0);max-height:900px;}
     table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:var(--radius);border:1px solid var(--border);background:#fff;box-shadow:var(--shadow-soft);}
     th,td{text-align:left;padding:12px 12px;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;font-size:13px;line-height:1.45;}
     th{background:var(--gray);font-weight:800;letter-spacing:-0.01em;color:rgba(29,29,31,.9);}
@@ -151,10 +151,7 @@
                 <p class="pill" id="reasonTag" style="margin:0 0 10px;display:inline-flex"></p>
                 <p class="productName" id="primaryName"></p>
               </div>
-              <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                <span id="primaryOldLabel" style="font-size:11px;color:var(--muted);margin-bottom:4px;display:none;font-weight:600;">历史官方参考价</span>
-                <div class="price" id="primaryPrice"></div>
-              </div>
+              <div class="price" id="primaryPrice"></div>
             </div>
             <ul class="bullets" id="primaryBullets"></ul>
             <div class="why" id="primaryWhy"></div>
@@ -163,6 +160,7 @@
             </div>
           </div>
 
+          <!-- 升级洞察（iPhone only） -->
           <div id="insightWrap" style="display:none">
             <div class="insightCard">
               <div class="insightLabel">升级洞察 · 这次换值不值？</div>
@@ -178,11 +176,7 @@
                 <p class="miniDesc" id="altDiff"></p>
                 <div class="miniFooter">
                   <span class="pill">备选价格</span>
-                  <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                    <span id="altOldLabel" style="font-size:11px;color:var(--muted);margin-bottom:4px;display:none;font-weight:600;">历史官方参考价</span>
-                    <span class="price" id="altPrice"></span>
-                    <span id="altOldBadge" style="font-size:11px;color:rgba(175,40,30,.85);margin-top:6px;display:none;font-weight:600;letter-spacing:-0.01em;">当前 Apple Store 已下架</span>
-                  </div>
+                  <span class="price" id="altPrice"></span>
                 </div>
               </div>
             </div>
@@ -329,6 +323,7 @@ const QS = {
 };
 
 // ══ iPhone First-timer Questions (separate path) ════════════
+// 当 Q2 = "Android / 第一次用 iPhone" 时，Q3/Q4 使用这套题目
 const QS_IP_FIRST = {
   q3:{ title:'你第一次用 iPhone，最希望马上感受到什么？', hint:'告诉我你最在意的体验方向，帮你找到最合适的入门款。',
     opts:[
@@ -347,72 +342,71 @@ const QS_IP_FIRST = {
 };
 
 // ══ iPhone SKU Pool ══════════════════════════════════════════
+// 价格为参考估算，以 Apple 官网实际价格为准
 const IP = [
-  { id:'ip16-128', name:'iPhone 16 128GB', isOld:false, price:'RMB 5399 起', n:5399, gen:16, gb:128, tier:'std', size:'reg',
+  { id:'ip16-128', name:'iPhone 16 128GB', price:'RMB 5399 起', n:5399, gen:16, gb:128, tier:'std', size:'reg',
     note:null,
     b:['降价后全系性价比最高的选择','A18 芯片，日常使用依然流畅顺滑','进入 / 留在苹果生态最经济的起点'],
     acc:[{n:'透明 MagSafe 保护壳',w:'保护机身同时展示颜色，磁吸生态入门'},{n:'编织 USB-C 数据线',w:'比原装线更耐用'}],
-    cmp:{'屏幕':'6.1寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'128GB','电池 / 续航':'一天日常使用更安心','亮点':'性价比入门首选'} },
-  { id:'ip16-256', name:'iPhone 16 256GB', isOld:true, price:'RMB 6399 起', n:6399, gen:16, gb:256, tier:'std', size:'reg',
+    cmp:{'价格':'RMB 5399 起','屏幕':'6.1寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'128GB','电池 / 续航':'一天日常使用更安心','亮点':'性价比入门首选'} },
+  { id:'ip16-256', name:'iPhone 16 256GB', price:'RMB 6399 起', n:6399, gen:16, gb:256, tier:'std', size:'reg',
     note:null,
     b:['256GB 大幅降低存储焦虑','更稳妥的标准版大容量方案','适合「大容量比追新更重要」的用户'],
     acc:[{n:'MagSafe 保护壳',w:'保护机身，体验磁吸配件生态'},{n:'MagSafe 充电器',w:'随手一放就充，桌面更整洁'}],
-    cmp:{'屏幕':'6.1寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'256GB','电池 / 续航':'更均衡的续航表现','亮点':'标准版大容量更稳'} },
-  { id:'ip16plus-128', name:'iPhone 16 Plus 128GB', isOld:false, price:'RMB 6999 起', n:6999, gen:16, gb:128, tier:'std', size:'plus',
+    cmp:{'价格':'RMB 6399 起','屏幕':'6.1寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'256GB','电池 / 续航':'更均衡的续航表现','亮点':'标准版大容量更稳'} },
+  { id:'ip16e-128', name:'iPhone 16e 128GB', price:'RMB 4499 起', n:4499, gen:16, gb:128, tier:'std', size:'reg',
     note:null,
-    b:['大屏与大电池，续航表现极其优异','A18 芯片，日常使用依然流畅顺滑','比 Pro Max 更轻，手感负担更小'],
-    acc:[{n:'透明 MagSafe 保护壳',w:'保护机身同时展示颜色'},{n:'MagSafe 充电器',w:'随手一放就充'}],
-    cmp:{'屏幕':'6.7寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'128GB','电池 / 续航':'大容量电池，重度使用一天无压力','亮点':'超强续航与大屏入门'} },
-  { id:'ip16plus-256', name:'iPhone 16 Plus 256GB', isOld:false, price:'RMB 7999 起', n:7999, gen:16, gb:256, tier:'std', size:'plus',
-    note:null,
-    b:['256GB 大容量，大屏娱乐更尽兴','大容量电池，视频和导航重度使用毫无压力','续航最顶的标准版机型'],
-    acc:[{n:'MagSafe 保护壳',w:'保护机身，体验磁吸配件生态'},{n:'MagSafe 充电器',w:'随手一放就充，桌面更整洁'}],
-    cmp:{'屏幕':'6.7寸 60Hz','芯片':'A18','相机':'4800万主摄，无长焦','存储':'256GB','电池 / 续航':'大容量电池，重度使用一天无压力','亮点':'超强续航大容量'} },
-  { id:'ip17-256', name:'iPhone 17 256GB', isOld:false, price:'RMB 5999 起', n:5999, gen:17, gb:256, tier:'std', size:'reg',
+    b:['更克制的预算进入苹果生态','轻量日常使用够用，入门更友好','适合「先试试 iOS 生态」的第一台 iPhone'],
+    acc:[{n:'透明保护壳',w:'保护机身同时不遮颜色'},{n:'20W USB‑C 充电器',w:'充电更快更省心'}],
+    cmp:{'价格':'RMB 4499 起','屏幕':'6.1寸','芯片':'A18','相机':'日常够用的主摄','存储':'128GB','电池 / 续航':'轻量使用可覆盖一天','亮点':'更克制的生态入门'} },
+  { id:'ip17-256', name:'iPhone 17 256GB', price:'RMB 5999 起', n:5999, gen:17, gb:256, tier:'std', size:'reg',
     note:null,
     b:['A19 芯片，性能全面提升','17 系列首次全系 120Hz ProMotion，标准版也不例外','256GB 基础版，日常不焦虑'],
     acc:[{n:'MagSafe 保护壳',w:'新机首配，磁吸生态从一开始就用上'},{n:'MagSafe 充电器',w:'随手一放就充'}],
-    cmp:{'屏幕':'6.1寸 120Hz ProMotion','芯片':'A19','相机':'主摄升级，日常更优','存储':'256GB','电池 / 续航':'单次日常使用可轻松覆盖一天','亮点':'17系列 120Hz 首发'} },
-  { id:'ip17-512', name:'iPhone 17 512GB', isOld:false, price:'RMB 7499 起', n:7499, gen:17, gb:512, tier:'std', size:'reg',
+    cmp:{'价格':'RMB 5999 起','屏幕':'6.1寸 120Hz ProMotion','芯片':'A19','相机':'主摄升级，日常更优','存储':'256GB','电池 / 续航':'单次日常使用可轻松覆盖一天','亮点':'17系列 120Hz 首发'} },
+  { id:'ip17-512', name:'iPhone 17 512GB', price:'RMB 7499 起', n:7499, gen:17, gb:512, tier:'std', size:'reg',
     note:null,
     b:['512GB 超大容量，拍照视频随便存','A19 + 大容量，3–4 年不存储焦虑','适合重度照片/视频用户'],
     acc:[{n:'MagSafe 保护壳',w:'保护大容量机身'},{n:'MagSafe 充电宝',w:'出门也不焦虑'}],
-    cmp:{'屏幕':'6.1寸 120Hz ProMotion','芯片':'A19','相机':'主摄升级','存储':'512GB（超大容量）','电池 / 续航':'重度拍照/视频也更从容','亮点':'标准版最大容量'} },
-  { id:'ip17air', name:'iPhone 17 Air 256GB', isOld:false, price:'RMB 7999 起', n:7999, gen:17, gb:256, tier:'std', size:'air',
+    cmp:{'价格':'RMB 7499 起','屏幕':'6.1寸 120Hz ProMotion','芯片':'A19','相机':'主摄升级','存储':'512GB（超大容量）','电池 / 续航':'重度拍照/视频也更从容','亮点':'标准版最大容量'} },
+  { id:'ip17air', name:'iPhone 17 Air 256GB', price:'RMB 7999 起', n:7999, gen:17, gb:256, tier:'std', size:'air',
     note:'⚠️ 仅支持 eSIM，中国大陆目前仅中国联通支持，购前请务必确认所用运营商',
     b:['全系最薄最轻的 iPhone，轻薄极致','6.6 寸大屏 + 超薄机身，视觉体验独特','适合对轻薄有极致追求的用户'],
     acc:[{n:'超薄 MagSafe 保护壳',w:'Air 的轻薄设计值得配套轻薄壳'},{n:'MagSafe 充电器',w:'无线补能更优雅'}],
-    cmp:{'屏幕':'6.6寸 120Hz ProMotion','芯片':'A19','相机':'超薄单摄系统','存储':'256GB','电池 / 续航':'大屏日常更安心，更适合外出场景','亮点':'⚠️ 仅eSIM（目前仅联通）'} },
-  { id:'ip16pro-256', name:'iPhone 16 Pro 256GB', isOld:true, price:'RMB 7999 起', n:7999, gen:16, gb:256, tier:'pro', size:'reg',
+    cmp:{'价格':'RMB 7999 起','屏幕':'6.6寸 120Hz ProMotion','芯片':'A19','相机':'超薄单摄系统','存储':'256GB','电池 / 续航':'大屏日常更安心，更适合外出场景','亮点':'⚠️ 仅eSIM（目前仅联通）'} },
+  { id:'ip16pro-256', name:'iPhone 16 Pro 256GB', price:'RMB 7999 起', n:7999, gen:16, gb:256, tier:'pro', size:'reg',
     note:null,
     b:['更克制的预算拿到接近的 Pro 级体验','Pro 三摄系统，拍照与视频更全面','适合第一次就想要更完整体验的人'],
     acc:[{n:'MagSafe 保护壳',w:'日常保护更省心'},{n:'AirPods Pro 2',w:'影音体验更完整'}],
-    cmp:{'屏幕':'6.3寸 120Hz ProMotion','芯片':'A18 Pro','相机':'Pro 三摄系统','存储':'256GB','电池 / 续航':'相比标准版更适合高频重度使用','亮点':'上一代 Pro 更稳的备选'} },
-  { id:'ip17pro-256', name:'iPhone 17 Pro 256GB', isOld:false, price:'RMB 8999 起', n:8999, gen:17, gb:256, tier:'pro', size:'reg',
+    cmp:{'价格':'RMB 7999 起','屏幕':'6.3寸 120Hz ProMotion','芯片':'A18 Pro','相机':'Pro 三摄系统','存储':'256GB','电池 / 续航':'相比标准版更适合高频重度使用','亮点':'上一代 Pro 更稳的备选'} },
+  { id:'ip17pro-256', name:'iPhone 17 Pro 256GB', price:'RMB 8999 起', n:8999, gen:17, gb:256, tier:'pro', size:'reg',
     note:null,
     b:['A19 Pro + 256GB，长期使用无后顾','Pro 三摄 + 5× 长焦，影像全面升级','Camera Control 实体快门键，拍摄更直觉'],
     acc:[{n:'钛金属质感保护壳',w:'旗舰机身配有质感的壳'},{n:'AirPods Pro 2',w:'完整旗舰影音体验'}],
-    cmp:{'屏幕':'6.3寸 120Hz ProMotion','芯片':'A19 Pro','相机':'Pro 三摄 + 5× 长焦','存储':'256GB','电池 / 续航':'更适合拍照、导航和长时间外出场景','亮点':'Pro 旗舰均衡首选'} },
-  { id:'ip17promax-256', name:'iPhone 17 Pro Max 256GB', isOld:false, price:'RMB 9999 起', n:9999, gen:17, gb:256, tier:'pro', size:'max',
+    cmp:{'价格':'RMB 8999 起','屏幕':'6.3寸 120Hz ProMotion','芯片':'A19 Pro','相机':'Pro 三摄 + 5× 长焦','存储':'256GB','电池 / 续航':'更适合拍照、导航和长时间外出场景','亮点':'Pro 旗舰均衡首选'} },
+  { id:'ip17promax-256', name:'iPhone 17 Pro Max 256GB', price:'RMB 10999 起', n:10999, gen:17, gb:256, tier:'pro', size:'max',
     note:null,
     b:['最大屏幕 + 最强续航，沉浸感最强','Pro Max 级影像系统，拍摄最全面','旗舰一步到位，3–4 年不后悔'],
     acc:[{n:'钛金属质感保护壳',w:'大屏旗舰更需要手感好的壳'},{n:'AirPods Pro 2',w:'旗舰组合体验最完整'}],
-    cmp:{'屏幕':'6.9寸 120Hz ProMotion（最大）','芯片':'A19 Pro','相机':'Pro Max 三摄，影像最强','存储':'256GB','电池 / 续航':'大屏与更强续航更适合重度用户','亮点':'大屏 + 最强续航'} },
-  { id:'ip17promax-512', name:'iPhone 17 Pro Max 512GB', isOld:false, price:'RMB 11999 起', n:11999, gen:17, gb:512, tier:'pro', size:'max',
+    cmp:{'价格':'RMB 10999 起','屏幕':'6.9寸 120Hz ProMotion（最大）','芯片':'A19 Pro','相机':'Pro Max 三摄，影像最强','存储':'256GB','电池 / 续航':'大屏与更强续航更适合重度用户','亮点':'大屏 + 最强续航'} },
+  { id:'ip17promax-512', name:'iPhone 17 Pro Max 512GB', price:'RMB 12499 起', n:12499, gen:17, gb:512, tier:'pro', size:'max',
     note:null,
     b:['顶配旗舰，一步到位无后顾之忧','512GB 满足最重度创作与存储需求','未来最长时间不想换机的组合'],
     acc:[{n:'钛金属质感保护壳',w:'顶配机型的品质感配件'},{n:'AirPods Pro 2',w:'完整旗舰体验收官'}],
-    cmp:{'屏幕':'6.9寸 120Hz ProMotion（最大）','芯片':'A19 Pro','相机':'Pro Max 三摄，影像最强','存储':'512GB（顶配）','电池 / 续航':'大屏与更强续航更适合重度用户','亮点':'顶配旗舰一步到位'} },
+    cmp:{'价格':'RMB 12499 起','屏幕':'6.9寸 120Hz ProMotion（最大）','芯片':'A19 Pro','相机':'Pro Max 三摄，影像最强','存储':'512GB（顶配）','电池 / 续航':'大屏与更强续航更适合重度用户','亮点':'顶配旗舰一步到位'} },
 ];
 const IP_CMP_FIELDS = ['价格','屏幕','芯片','相机','存储','电池 / 续航','亮点'];
 
 function scoreIP(s, q2, q3, q4){
   let sc = 0;
-  if(q3==='想要更轻更小的手感' && (s.size==='max' || s.size==='plus')) return -999;
+  // Hard kill conditions (return -999 to exclude from primary)
+  if(q3==='想要更轻更小的手感' && (s.size==='max')) return -999;
   if(q3==='存储不够' && q4==='大容量优先' && s.gb<256) return -999;
   if(q3==='想一步到位，用很多年' && s.gb<256) return -999;
+  // [BUG FIX] "续航不行了" ≠ "我要最强续航"；控制预算时 Pro Max 不能做主推
   if(q3==='续航不行了' && q4==='控制预算' && s.size==='max') return -999;
 
+  // 当前机型 / 代际跨度 (30pts)
   if(q2==='Android / 第一次用 iPhone'){
     if(s.gen===17&&s.tier==='std') sc+=30; else if(s.gen===17&&s.tier==='pro'&&s.size!=='max') sc+=18;
     else if(s.gen===17&&s.size==='max') sc+=10; else if(s.gen===16) sc+=14;
@@ -421,22 +415,26 @@ function scoreIP(s, q2, q3, q4){
   } else if(q2==='iPhone 14–15 标准版'){
     if(s.gen===17&&s.tier==='pro') sc+=30; else if(s.gen===17&&s.tier==='std') sc+=20;
     else if(s.gen===16) sc+=10;
-  } else { 
+  } else { // Pro/ProMax users
     if(s.gen===17&&s.tier==='pro') sc+=30; else if(s.gen===17&&s.tier==='std') sc+=12; else sc+=4;
   }
 
+  // 换机原因 (30pts)
+  // [BUG FIX] "续航不行了" = 改善续航体验，不等于"追求最强续航"；Max 不应因此获得最高分
   if(q3==='续航不行了'){
-    if(s.size==='max') sc+=20; else if(s.size==='plus') sc+=24; else if(s.size==='air') sc+=8; else if(s.gen===17) sc+=22; else sc+=14;
+    if(s.size==='max') sc+=20; else if(s.size==='air') sc+=8; else if(s.gen===17) sc+=26; else sc+=14;
   } else if(q3==='存储不够'){
     if(s.gb>=512) sc+=30; else if(s.gb>=256) sc+=22; else sc+=6;
   } else if(q3==='想要更好的拍照 / 视频'){
     if(s.tier==='pro') sc+=30; else if(s.gen===17) sc+=12; else sc+=5;
   } else if(q3==='想要更轻更小的手感'){
+    // max already killed; air is lighter but eSIM issue
     if(s.size==='reg') sc+=30; else if(s.size==='air') sc+=18;
-  } else { 
+  } else { // 一步到位
     if(s.tier==='pro'&&s.gb>=256) sc+=30; else if(s.gb>=256) sc+=20; else sc+=10;
   }
 
+  // 购买方式 (20pts)
   if(q4==='控制预算'){
     if(s.n<=4999) sc+=20; else if(s.n<=5499) sc+=18; else if(s.n<=5999) sc+=14;
     else if(s.n<=6499) sc+=10; else sc+=Math.max(0,8-Math.floor((s.n-6500)/1500));
@@ -444,13 +442,12 @@ function scoreIP(s, q2, q3, q4){
     if(s.gen===17) sc+=20; else sc+=6;
   } else if(q4==='大容量优先'){
     if(s.gb>=512) sc+=20; else if(s.gb>=256) sc+=14; else sc+=3;
-  } else { 
+  } else { // 旗舰完整体验
     if(s.size==='max') sc+=20; else if(s.tier==='pro') sc+=16; else sc+=4;
   }
 
+  // 尺寸/存储偏好 tiebreaker (20pts)
   if(q3==='续航不行了'&&q4!=='控制预算'&&s.size==='max') sc+=20;
-  if(q3==='续航不行了'&&q4==='控制预算'&&s.size==='plus') sc+=20;
-  if(q3==='续航不行了'&&q4!=='控制预算'&&s.size==='plus') sc+=15;
   if(q3==='存储不够'&&q4==='大容量优先'&&s.gb>=512) sc+=20;
   else if(q3==='存储不够'&&q4==='大容量优先'&&s.gb>=256) sc+=10;
 
@@ -458,10 +455,13 @@ function scoreIP(s, q2, q3, q4){
 }
 
 function matchIP(q2,q3,q4){
-  const primary = IP.reduce((best,s)=>{ const sc=scoreIP(s,q2,q3,q4); return sc>best.sc?{s,sc}:best; },{s:IP[4],sc:-Infinity}).s;
+  const primary = IP.reduce((best,s)=>{ const sc=scoreIP(s,q2,q3,q4); return sc>best.sc?{s,sc}:best; },{s:IP[2],sc:-Infinity}).s;
+  // alt: full pool except primary, score without hard-kill (allow 128 as alt)
   const altPool = IP.filter(s=>s.id!==primary.id);
   const altScore = s=>{
     let sc=0;
+    // softer scoring for alt (no hard kill)
+    const q3eff=q3==='存储不够'&&q4==='大容量优先'?'存储不够':q3;
     if(s.gen===17) sc+=20; else sc+=8;
     if(s.tier==='pro') sc+=15;
     if(s.gb>=256) sc+=10;
@@ -469,7 +469,6 @@ function matchIP(q2,q3,q4){
     if(q4==='新款优先'&&s.gen>primary.gen) sc+=12;
     if(q4==='大容量优先'&&s.gb>primary.gb) sc+=15;
     if(q4==='旗舰完整体验'&&s.tier==='pro'&&primary.tier!=='pro') sc+=18;
-    if(q3==='续航不行了'&&s.size==='plus') sc+=18;
     return sc;
   };
   const alt = altPool.reduce((best,s)=>{ const sc=altScore(s); return sc>best.sc?{s,sc}:best; },{s:altPool[0],sc:-Infinity}).s;
@@ -478,7 +477,7 @@ function matchIP(q2,q3,q4){
 
 function ipInsight(q2,q3,q4,primary){
   if(q2==='iPhone 13 及更早')
-    return '你至少用了 3 年，这次升级无论选哪款，续航、拍照和流畅度都会有明显飞跃——是真正值得换的时机。';
+    return '你至少用了 3 年，这次升级无论选哪款 17 系列，续航、拍照和流畅度都会有明显飞跃——是真正值得换的时机。';
   if((q2==='iPhone 14–15 标准版')&&q3==='想要更好的拍照 / 视频'&&primary.tier==='pro')
     return '从标准版跨到 Pro 系，感知升级远大于同档换代。Pro 的 5× 长焦是标准版完全没有的核心差异——这次换 Pro 比单纯换新款标准版更值。';
   if(q3==='存储不够'&&q4==='大容量优先')
@@ -488,9 +487,9 @@ function ipInsight(q2,q3,q4,primary){
   if(q3==='想一步到位，用很多年')
     return '选高存储和高配置短期看预算更高，但 3–4 年后回头看通常是更不后悔的决定。一步到位的后悔概率，远低于将就妥协的后悔概率。';
   if(q2==='Android / 第一次用 iPhone')
-    return '第一次用 iPhone，系统和生态切换本身就是最大的体验升级。先用标准版或大屏大电池适应 iOS 生态，比一开始就买 Pro Max 更理性。';
+    return '第一次用 iPhone，系统和生态切换本身就是最大的体验升级。先用标准版适应 iOS 和 iCloud 生态，比一开始就买 Pro Max 更理性——之后再按需升级。';
   if(q2==='iPhone 14–15 Pro / Pro Max')
-    return '你已经在用 Pro 系了。影像升级都有感知，但如果当前使用没有明显痛点，可以再等一年观察。';
+    return '你已经在用 Pro 系了。从 15 Pro 升到 17 Pro 跨越一代，A19 Pro 和影像升级都有感知，但如果当前使用没有明显痛点，可以再等一年观察。';
   return null;
 }
 
@@ -508,28 +507,21 @@ function ipWhy(q2,q3,q4,primary,alt){
     '大容量优先':'你最在意容量不焦虑，',
     '旗舰完整体验':'你追求完整旗舰体验，',
   }[q4]||'';
-  
-  const costLess = alt.isOld ? `历史参考价便宜 RMB ${primary.n-alt.n} 元` : `便宜 RMB ${primary.n-alt.n} 元`;
   const altHint = alt.gb>primary.gb?`如果你更在意大容量，可以考虑备选的 ${alt.name}`:
-    alt.n<primary.n?`如果你更在意控制预算，可以考虑备选的 ${alt.name}（${costLess}）`:
+    alt.n<primary.n?`如果你更在意控制预算，可以考虑备选的 ${alt.name}（便宜 RMB ${primary.n-alt.n} 元）`:
     alt.tier==='pro'&&primary.tier!=='pro'?`如果你更在意旗舰影像，可以考虑备选的 ${alt.name}`:
     alt.gen>primary.gen?`如果你更在意最新一代，可以考虑备选的 ${alt.name}`:`备选 ${alt.name} 也是不错的选择`;
   return `${bLine}${rLine}，因此 ${primary.name} 是目前最匹配你的选择。${altHint}。`;
 }
 
 function ipAltDiff(primary,alt){
-  const costLess = alt.isOld ? `历史参考价便宜 RMB ${primary.n-alt.n} 元` : `便宜 RMB ${primary.n-alt.n} 元`;
-  const costMore = alt.isOld ? `历史参考价为 RMB ${alt.n}（高于主推现价）` : `多花 RMB ${alt.n-primary.n} 元`;
-  const priceDiffStr = alt.n < primary.n ? costLess : (alt.n > primary.n ? costMore : '价格相同');
-
-  if(alt.gb>primary.gb) return `如果你更在意大容量（${alt.gb}GB），${alt.name} ${alt.n>primary.n ? costMore : costLess}`;
-  if(alt.gb<primary.gb) return `如果你更在意控制预算，${alt.name} ${costLess}，存储更克制（${alt.gb}GB）`;
+  if(alt.gb>primary.gb) return `如果你更在意大容量（${alt.gb}GB），${alt.name} 多花 RMB ${alt.n-primary.n} 元`;
+  if(alt.gb<primary.gb) return `如果你更在意控制预算，${alt.name} 便宜 RMB ${primary.n-alt.n} 元，存储更克制（${alt.gb}GB）`;
+  if(alt.n<primary.n) return `如果你更在意节省预算，${alt.name} 便宜 RMB ${primary.n-alt.n} 元`;
+  if(alt.n>primary.n) return `如果你更在意更完整体验，${alt.name} 多花 RMB ${alt.n-primary.n} 元`;
   if(alt.tier==='pro'&&primary.tier!=='pro') return `如果你更在意 Pro 级影像（5× 长焦），${alt.name} 是更完整的旗舰选择`;
   if(alt.size==='max') return `如果你更在意大屏和最强续航，${alt.name} 屏幕更大，续航更强`;
-  if(alt.size==='plus') return `如果你更在意大屏和极佳续航体验，${alt.name} 是标准版里的长续航优选，${priceDiffStr}`;
-  if(alt.n<primary.n) return `如果你更在意节省预算，${alt.name} ${costLess}`;
-  if(alt.n>primary.n) return `如果你更在意更完整体验，${alt.name} ${costMore}`;
-  return `${alt.name} 是另一个值得考虑的方向`;
+  return `${alt.name}（${alt.price}）是另一个值得考虑的方向`;
 }
 
 function ipTag(q2,q3,q4,primary){
@@ -537,7 +529,6 @@ function ipTag(q2,q3,q4,primary){
   if(q3==='存储不够'&&q4==='新款优先') return '新款体验推荐';
   if(primary.tier==='pro'&&primary.size==='max') return '旗舰一步到位';
   if(primary.tier==='pro') return '旗舰影像优先';
-  if(primary.size==='plus') return '长续航大屏优选';
   if(primary.gen===17) return '新款均衡推荐';
   return '性价比优选';
 }
@@ -546,41 +537,48 @@ function ipTag(q2,q3,q4,primary){
 function matchIPFirstTimer(q3, q4){
   const byId = id => IP.find(s => s.id === id);
 
+  // 路线 1：日常顺手，不容易买错
   if(q3 === '日常顺手，不容易买错'){
-    if(q4 === '容量更稳，想多用几年') return { primary: byId('ip17-256'), alt: byId('ip16plus-256') };
-    return { primary: byId('ip17-256'), alt: byId('ip16-128') };
+    return { primary: byId('ip17-256'), alt: byId('ip16-256') };
   }
+
+  // 路线 2：拍照更好，记录生活更有感
   if(q3 === '拍照更好，记录生活更有感'){
     if(q4 === '愿意多花一点，体验更完整' || q4 === '容量更稳，想多用几年'){
       return { primary: byId('ip17pro-256'), alt: byId('ip16pro-256') };
     }
+    // 其他 Q4：标准版 + Pro 作备选
     return { primary: byId('ip17-256'), alt: byId('ip17pro-256') };
   }
+
+  // 路线 3：续航更安心，一天用下来不焦虑
   if(q3 === '续航更安心，一天用下来不焦虑'){
     if(q4 === '愿意多花一点，体验更完整'){
-      return { primary: byId('ip17pro-256'), alt: byId('ip16plus-256') };
+      // 续航 + 愿意多花 → Pro
+      return { primary: byId('ip17pro-256'), alt: byId('ip16pro-256') };
     }
-    if(q4 === '先买一台不容易选错的'){
-      return { primary: byId('ip16plus-128'), alt: byId('ip17-256') };
-    }
-    if(q4 === '容量更稳，想多用几年'){
-      return { primary: byId('ip16plus-256'), alt: byId('ip17-256') };
-    }
-    return { primary: byId('ip17-256'), alt: byId('ip16-128') };
+    // 其他 Q4：标准版为主，Pro 作备选
+    return { primary: byId('ip17-256'), alt: byId('ip17pro-256') };
   }
+
+  // 路线 4：先体验苹果生态，看看适不适合我
   if(q3 === '先体验苹果生态，看看适不适合我'){
-    return { primary: byId('ip16-128'), alt: byId('ip17-256') };
+    return { primary: byId('ip16-256'), alt: byId('ip17-256') };
   }
+
+  // 轻薄手感（Q4 兜底）
   if(q4 === '更在意轻薄和手感'){
-    return { primary: byId('ip17-256'), alt: byId('ip16-128') };
+    return { primary: byId('ip17-256'), alt: byId('ip16-256') };
   }
-  return { primary: byId('ip17-256'), alt: byId('ip16-128') };
+
+  // 默认兜底
+  return { primary: byId('ip17-256'), alt: byId('ip16-256') };
 }
 
 function ipTagFirstTimer(q3, q4, primary){
   if(q3 === '日常顺手，不容易买错') return '首次入门稳妥推荐';
   if(q3 === '拍照更好，记录生活更有感') return primary.tier==='pro' ? '首次入门影像优先' : '首次入门均衡推荐';
-  if(q3 === '续航更安心，一天用下来不焦虑') return primary.tier==='pro' ? '首次入门完整体验' : '首次入门长续航推荐';
+  if(q3 === '续航更安心，一天用下来不焦虑') return primary.tier==='pro' ? '首次入门完整体验' : '首次入门均衡推荐';
   if(q3 === '先体验苹果生态，看看适不适合我') return '生态入门试水推荐';
   return '首次入门推荐';
 }
@@ -589,116 +587,112 @@ function ipWhyFirstTimer(q3, q4, primary, alt){
   if(q3 === '日常顺手，不容易买错')
     return `你第一次进入 iPhone 体系，更重要的是买一台顺手、稳定、不容易后悔的机型，因此我们优先推荐标准版主线，而不是一开始就把你推向更重更贵的 Pro 系列。如果想进一步控制预算，备选的 ${alt.name} 仍然是稳妥的入门方案。`;
   if(q3 === '拍照更好，记录生活更有感' && (q4 === '愿意多花一点，体验更完整' || q4 === '容量更稳，想多用几年'))
-    return `你第一次买 iPhone，已经把拍照体验放在了更高优先级，同时也愿意为更完整体验多花一点，因此我们优先推荐 Pro 系列。如果想用更理性的方案换到接近的 Pro 级体验，备选的 ${alt.name} 会是更平稳的选择。`;
+    return `你第一次买 iPhone，已经把拍照体验放在了更高优先级，同时也愿意为更完整体验多花一点，因此我们优先推荐 Pro 系列。如果想用更克制的预算换到接近的 Pro 级体验，备选的 ${alt.name} 会是更理性的选择。`;
   if(q3 === '拍照更好，记录生活更有感')
     return `你第一次用 iPhone，对拍照体验有明确追求，但也倾向于先选一个稳妥入门的方案。我们先推荐标准版主线——如果你发现影像需求更高，备选的 ${alt.name} 是更完整的 Pro 选择。`;
   if(q3 === '续航更安心，一天用下来不焦虑' && q4 === '愿意多花一点，体验更完整')
-    return `你第一次买 iPhone，对续航有明确要求，同时也愿意为更完整体验多投入一些预算，因此 Pro 系列比标准版更符合你的预期。如果你想在保证极佳续航的同时让预算更理性，备选的大屏长续航 ${alt.name} 也是极其稳妥的选择。`;
+    return `你第一次买 iPhone，对续航有明确要求，同时也愿意为更完整体验多投入一些预算，因此 Pro 系列比标准版更符合你的预期。如果想用更理性的价格拿到接近的 Pro 体验，备选的 ${alt.name} 也是稳的选择。`;
   if(q3 === '续航更安心，一天用下来不焦虑')
-    return `你更希望第一次用 iPhone 就稳稳解决日常续航焦虑，因此我们推荐拥有大电池加持的 ${primary.name}，它是标准版中续航表现极其突出的选择。如果你也愿意考虑其他尺寸或更新的主线代际，备选的 ${alt.name} 会提供另一种均衡体验。`;
+    return `你更希望第一次用 iPhone 就稳稳地解决日常续航焦虑，因此我们先推荐更均衡、也更容易买对的标准版主线，而不是直接把你推到更贵的 Pro 系列。如果你也愿意为更完整体验多花一点，备选的 ${alt.name} 会给你更进一步的整体体验。`;
   if(q3 === '先体验苹果生态，看看适不适合我')
-    return `你这次更像是想先进入苹果生态体验一下，所以我们优先推荐一个门槛更低、更容易接受的标准版入门方案，而不是一开始就把预算拉高。`;
+    return `你这次更像是想先进入苹果生态体验一下，因此我们优先给你一个更克制、更容易接受的入门方案，而不是一开始就把预算拉高。如果更希望第一次入门就直接上当前主线，备选的 ${alt.name} 会更合适。`;
   return `你第一次进入 iPhone 体系，${primary.name} 是稳妥的入门选择。`;
 }
 
 function ipAltDiffFirstTimer(q3, q4, primary, alt){
-  const costLess = alt.isOld ? `历史参考价便宜 RMB ${primary.n - alt.n} 元` : `便宜 RMB ${primary.n - alt.n} 元`;
-  const costMore = alt.isOld ? `历史参考价为 RMB ${alt.n}（高于主推现价）` : `多花 RMB ${alt.n - primary.n} 元`;
-  const priceDiffStr = alt.n < primary.n ? costLess : (alt.n > primary.n ? costMore : '价格相同');
-
   if(q3 === '日常顺手，不容易买错')
-    return `如果你想进一步控制预算或大容量方案，${alt.name} 仍然是稳妥的入门选择，${priceDiffStr}`;
+    return `如果你想进一步控制预算，${alt.name} 便宜 RMB ${primary.n - alt.n} 元，仍然是稳妥的入门方案`;
   if(q3 === '拍照更好，记录生活更有感' && (q4 === '愿意多花一点，体验更完整' || q4 === '容量更稳，想多用几年'))
     return `如果你想用更理性的价格拿到接近的 Pro 级拍照体验，备选的 ${alt.name} 会是更稳的选择。`;
   if(q3 === '拍照更好，记录生活更有感')
     return `如果你的影像需求更明确且愿意多花，${alt.name}（Pro 系）的三摄 + 5× 长焦是标准版没有的核心差异`;
   if(q3 === '续航更安心，一天用下来不焦虑' && q4 === '愿意多花一点，体验更完整')
-    return `如果你希望用更克制的预算换来极致的续航和大屏体验（无需 Pro 级功能），备选的 ${alt.name} 更稳妥，${priceDiffStr}。`;
+    return `如果你希望用更克制的预算换来接近的 Pro 级续航与整体体验，备选的 ${alt.name} 更稳妥。`;
   if(q3 === '续航更安心，一天用下来不焦虑')
-    return `如果你也想参考最新的主线标准版体验，${alt.name} 有新一代芯片与更均衡的单手握持感，${priceDiffStr}。`;
+    return `如果你也愿意为更完整体验多花一点，${alt.name} 有 Pro 级影像与更高性能，是更进一步的选择`;
   if(q3 === '先体验苹果生态，看看适不适合我')
-    return `如果你希望第一次入门就直接上当前主线，并获得更完整的新一代体验，可以考虑 ${alt.name}。`;
+    return `如果更希望第一次就直接上当前主线，${alt.name} 是更新一代的标准版，多花 RMB ${alt.n - primary.n} 元`;
   return alt.n < primary.n
-    ? `如果你更在意节省预算，${alt.name} ${costLess}`
-    : `如果你更在意更完整体验，${alt.name} ${alt.isOld ? '不过需注意其' + costMore : costMore}`;
+    ? `如果你更在意节省预算，${alt.name} 便宜 RMB ${primary.n - alt.n} 元`
+    : `如果你更在意更完整体验，${alt.name} 多花 RMB ${alt.n - primary.n} 元`;
 }
 
 
-// ══ MacBook Data & Engine ════════════════════════════════════
 const MB = {
-  air13:{ name:'MacBook Air 13 寸 M3', line:'air', size:13, chipTier:'base', price:'RMB 8999 起', n:8999, tag:'轻便均衡首选',
+  air13:{ name:'MacBook Air 13 寸 M3', price:'RMB 8999 起', n:8999, tag:'轻便均衡首选',
     b:['最轻便，1.24kg，上课通勤最友好','M3 芯片，日常全能任务流畅应对','无风扇安静，续航约 18 小时'],
     acc:[{n:'USB-C Hub',w:'补足接口，课堂/会议连接更从容'},{n:'轻薄保护套',w:'高频携带减少磕碰，更安心'}],
-    cmp:{'屏幕':'13.6寸 Liquid Retina','芯片':'M3','续航':'约 18 小时','散热':'无风扇，安静省心','适合':'轻便办公/上课'} },
-  air15:{ name:'MacBook Air 15 寸 M3', line:'air', size:15, chipTier:'base', price:'RMB 10499 起', n:10499, tag:'大屏便携均衡',
+    cmp:{'价格':'RMB 8999 起','屏幕':'13.6寸 Liquid Retina','芯片':'M3','续航':'约 18 小时','散热':'无风扇，安静省心','适合':'轻便办公/上课'} },
+  air15:{ name:'MacBook Air 15 寸 M3', price:'RMB 10499 起', n:10499, tag:'大屏便携均衡',
     b:['15 寸大屏，分屏工作更舒服','无风扇安静，续航约 18 小时','比 13 寸多花 1500 元，屏幕体验明显提升'],
     acc:[{n:'USB-C Hub',w:'桌面连接更完整'},{n:'MagSafe 充电器',w:'补能方便，桌面更整洁'}],
-    cmp:{'屏幕':'15.3寸 Liquid Retina','芯片':'M3','续航':'约 18 小时','散热':'无风扇，安静省心','适合':'大屏/日常全能'} },
-  pro14:{ name:'MacBook Pro 14 寸 M4', line:'pro', size:14, chipTier:'base', price:'RMB 13999 起', n:13999, tag:'性能完整体验',
+    cmp:{'价格':'RMB 10499 起','屏幕':'15.3寸 Liquid Retina','芯片':'M3','续航':'约 18 小时','散热':'无风扇，安静省心','适合':'大屏/日常全能'} },
+  pro14:{ name:'MacBook Pro 14 寸 M4', price:'RMB 13999 起', n:13999, tag:'性能完整体验',
     b:['M4 芯片 + 主动散热，持续性能更稳','Liquid Retina XDR 屏幕，色彩细节更优秀','续航约 24 小时，高强度工作不担心'],
     acc:[{n:'USB-C Hub / 雷雳扩展坞',w:'补足接口，桌面连接一体化'},{n:'外接显示器',w:'多窗口效率明显提升'}],
-    cmp:{'屏幕':'14.2寸 Liquid Retina XDR','芯片':'M4','续航':'约 24 小时','散热':'主动散热，持续输出稳','适合':'开发/创作/长期主力'} },
-  pro14pro:{ name:'MacBook Pro 14 寸 M4 Pro', line:'pro', size:14, chipTier:'pro', price:'RMB 16999 起', n:16999, tag:'高性能开发主力',
+    cmp:{'价格':'RMB 13999 起','屏幕':'14.2寸 Liquid Retina XDR','芯片':'M4','续航':'约 24 小时','散热':'主动散热，持续输出稳','适合':'开发/创作/长期主力'} },
+  pro14pro:{ name:'MacBook Pro 14 寸 M4 Pro', price:'RMB 16999 起', n:16999, tag:'高性能开发主力',
     b:['M4 Pro 芯片，更强多核和内存带宽','雷雳 5 接口，外设连接速度和带宽更强','适合重度开发、剪辑等高负载持续任务'],
     acc:[{n:'雷雳 5 扩展坞',w:'充分发挥接口带宽，外设连接最高效'},{n:'外接 4K 显示器',w:'开发/设计多窗口效率飞跃'}],
-    cmp:{'屏幕':'14.2寸 Liquid Retina XDR','芯片':'M4 Pro','续航':'约 24 小时','散热':'主动散热，重载更稳','适合':'重度开发/高强度创作'} },
-  pro16:{ name:'MacBook Pro 16 寸 M4 Pro', line:'pro', size:16, chipTier:'pro', price:'RMB 19999 起', n:19999, tag:'大屏旗舰主力',
+    cmp:{'价格':'RMB 16999 起','屏幕':'14.2寸 Liquid Retina XDR','芯片':'M4 Pro','续航':'约 24 小时','散热':'主动散热，重载更稳','适合':'重度开发/高强度创作'} },
+  pro16:{ name:'MacBook Pro 16 寸 M4 Pro', price:'RMB 19999 起', n:19999, tag:'大屏旗舰主力',
     b:['16 寸最大屏，多窗口和创作效率最高','M4 Pro 芯片，重度任务持续输出最稳','最适合把 MacBook 当作主力工作站的用户'],
     acc:[{n:'雷雳 5 扩展坞',w:'桌面连接完整，外设一步到位'},{n:'外接显示器',w:'16 寸 + 外屏，双屏效率最高'}],
-    cmp:{'屏幕':'16.2寸 Liquid Retina XDR','芯片':'M4 Pro','续航':'约 24 小时','散热':'最强散热，持续最稳','适合':'重度创作/视频剪辑主力'} },
+    cmp:{'价格':'RMB 19999 起','屏幕':'16.2寸 Liquid Retina XDR','芯片':'M4 Pro','续航':'约 24 小时','散热':'最强散热，持续最稳','适合':'重度创作/视频剪辑主力'} },
 };
 const MB_CMP_FIELDS = ['价格','屏幕','芯片','续航','散热','适合'];
 
 function scoreMB(sku,q2,q3,q4){
-  const isAir = sku.line === 'air';
-  const isPro = sku.line === 'pro';
-  const isM4Pro = sku.chipTier === 'pro';
-
-  if(q2==='视频剪辑 / 设计'&&q4==='性能抗未来'&&isAir) return -999;
-  if(q2==='写代码 / 开发'&&q3==='经常接显示器 / 外设'&&isAir&&sku.size===13) return -999;
-
+  const n=sku.name;
+  // Hard filters
+  if(q2==='视频剪辑 / 设计'&&q4==='性能抗未来'&&n.includes('Air')) return -999;
+  if(q2==='写代码 / 开发'&&q3==='经常接显示器 / 外设'&&n.includes('Air 13')) return -999;
   let sc=0;
 
+  // 工作负载 (35pts)
   if(q2==='文档办公 / 上课'){
-    if(isAir && sku.size===13) sc+=35; else if(isAir && sku.size===15) sc+=26;
-    else if(isPro && !isM4Pro) sc+=15; else sc+=8;
+    if(n.includes('Air 13')) sc+=35; else if(n.includes('Air 15')) sc+=26;
+    else if(n.includes('Pro 14 M4 ')) sc+=15; else sc+=8;
   } else if(q2==='写代码 / 开发'){
-    if(isM4Pro) sc+=35; else if(isPro && !isM4Pro) sc+=28;
-    else if(isAir && sku.size===15) sc+=18; else if(sku.size===16) sc+=22; else sc+=8;
+    if(n.includes('M4 Pro')) sc+=35; else if(n.includes('Pro 14 M4 ')) sc+=28;
+    else if(n.includes('Air 15')) sc+=18; else if(n.includes('Pro 16')) sc+=22; else sc+=8;
   } else if(q2==='视频剪辑 / 设计'){
-    if(sku.size===16) sc+=35; else if(isM4Pro) sc+=30;
-    else if(isPro && !isM4Pro) sc+=22; else if(isAir && sku.size===15) sc+=10; else sc+=3;
-  } else {
-    if(isAir && sku.size===13) sc+=32; else if(isAir && sku.size===15) sc+=30;
-    else if(isPro && !isM4Pro) sc+=20; else sc+=14;
+    if(n.includes('Pro 16')) sc+=35; else if(n.includes('M4 Pro')) sc+=30;
+    else if(n.includes('Pro 14 M4 ')) sc+=22; else if(n.includes('Air 15')) sc+=10; else sc+=3;
+  } else { // 日常全能
+    if(n.includes('Air 13')) sc+=32; else if(n.includes('Air 15')) sc+=30;
+    else if(n.includes('Pro 14 M4 ')) sc+=20; else sc+=14;
   }
 
+  // 使用形态 (25pts)
   if(q3==='经常带着走'){
-    if(isAir && sku.size===13) sc+=25; else if(isAir && sku.size===15) sc+=18;
-    else if(sku.size===14) sc+=10; else sc+=4;
+    if(n.includes('Air 13')) sc+=25; else if(n.includes('Air 15')) sc+=18;
+    else if(n.includes('Pro 14')) sc+=10; else sc+=4;
   } else if(q3==='主要在宿舍 / 工位用'){
-    if(isAir && sku.size===15) sc+=22; else if(isPro && sku.size===14) sc+=22;
-    else if(isAir && sku.size===13) sc+=18; else sc+=15;
+    if(n.includes('Air 15')) sc+=22; else if(n.includes('Pro 14')) sc+=22;
+    else if(n.includes('Air 13')) sc+=18; else sc+=15;
   } else if(q3==='经常接显示器 / 外设'){
-    if(isM4Pro) sc+=25; else if(isPro && !isM4Pro) sc+=22;
-    else if(sku.size===16) sc+=22; else if(isAir && sku.size===15) sc+=14; else sc+=8;
-  } else { 
-    if(isM4Pro) sc+=25; else if(isPro && !isM4Pro) sc+=20;
-    else if(isAir && sku.size===15) sc+=15; else if(isAir && sku.size===13) sc+=12; else sc+=10;
+    if(n.includes('M4 Pro')) sc+=25; else if(n.includes('Pro 14 M4 ')) sc+=22;
+    else if(n.includes('Pro 16')) sc+=22; else if(n.includes('Air 15')) sc+=14; else sc+=8;
+  } else { // 用很多年
+    if(n.includes('M4 Pro')) sc+=25; else if(n.includes('Pro 14 M4 ')) sc+=20;
+    else if(n.includes('Air 15')) sc+=15; else if(n.includes('Air 13')) sc+=12; else sc+=10;
   }
 
+  // 购买取向 (25pts)
   if(q4==='预算友好'){
     if(sku.n<=8999) sc+=25; else if(sku.n<=10499) sc+=18; else if(sku.n<=13999) sc+=10; else sc+=3;
   } else if(q4==='均衡稳妥'){
     if(sku.n<=10499) sc+=22; else if(sku.n<=13999) sc+=20; else sc+=10;
   } else if(q4==='性能抗未来'){
-    if(isM4Pro) sc+=25; else if(isPro && !isM4Pro) sc+=18;
-    else if(isAir) sc+=5; else sc+=12;
-  } else {
-    if(sku.size===16) sc+=25; else if(isAir && sku.size===15) sc+=22;
-    else if(isPro && sku.size===14) sc+=14; else sc+=8;
+    if(n.includes('M4 Pro')) sc+=25; else if(n.includes('Pro 14 M4 ')) sc+=18;
+    else if(n.includes('Air')) sc+=5; else sc+=12;
+  } else { // 大屏优先
+    if(n.includes('Pro 16')) sc+=25; else if(n.includes('Air 15')) sc+=22;
+    else if(n.includes('Pro 14')) sc+=14; else sc+=8;
   }
 
+  // 价格适配 (15pts)
   sc+=Math.max(0,15-Math.floor((sku.n-8999)/2200));
   return sc;
 }
@@ -746,11 +740,13 @@ const AP = [
 const AP_CMP_FIELDS = ['价格','佩戴','降噪','续航','特色'];
 
 function scoreAP(s,q2,q3,q4){
-  if(q4==='有降噪更安心'&&!s.hasNC) return -999; 
+  // Hard kills
+  if(q4==='有降噪更安心'&&!s.hasNC) return -999; // [V4 BUG FIX] NC required → standard excluded
   if(q3==='运动使用'&&s.id==='apmax') return -999;
   if(q4==='佩戴更轻松'&&s.id==='apmax') return -999;
   let sc=0;
 
+  // 场景匹配 (35pts)
   if(q3==='通勤 / 降噪'){
     if(s.id==='appro2') sc+=35; else if(s.id==='ap4anc') sc+=26;
     else if(s.id==='apmax') sc+=18; else if(s.id==='ap4std') sc+=4; else sc+=10;
@@ -760,31 +756,34 @@ function scoreAP(s,q2,q3,q4){
   } else if(q3==='办公 / 多设备切换'){
     if(s.id==='appro2') sc+=35; else if(s.id==='apmax') sc+=24;
     else if(s.id==='ap4anc') sc+=20; else if(s.id==='ap4std') sc+=14; else sc+=8;
-  } else {
+  } else { // 运动
     if(s.id==='beats') sc+=35; else if(s.id==='ap4std') sc+=24;
     else if(s.id==='ap4anc') sc+=18; else if(s.id==='appro2') sc+=10; else sc+=0;
   }
 
+  // 必要条件 (35pts)
   if(q4==='价格更友好'){
     if(s.n<=999) sc+=35; else if(s.n<=1399) sc+=28; else if(s.n<=1899) sc+=15; else sc+=4;
   } else if(q4==='有降噪更安心'){
     if(s.id==='appro2') sc+=35; else if(s.id==='ap4anc') sc+=28;
-    else if(s.id==='apmax') sc+=30; else if(s.id==='beats') sc+=22; 
+    else if(s.id==='apmax') sc+=30; else if(s.id==='beats') sc+=22; // all have NC
   } else if(q4==='音质更好'){
     if(s.id==='apmax') sc+=35; else if(s.id==='appro2') sc+=28;
     else if(s.id==='ap4anc') sc+=14; else if(s.id==='beats') sc+=12; else sc+=6;
-  } else {
+  } else { // 佩戴更轻松
     if(s.id==='ap4std') sc+=35; else if(s.id==='ap4anc') sc+=28;
     else if(s.id==='appro2') sc+=16; else if(s.id==='beats') sc+=10;
   }
 
+  // 设备生态 (15pts)
   if(q2==='iPhone + Mac 都用'){
     if(s.id==='appro2') sc+=15; else if(s.id==='ap4anc'||s.id==='ap4std') sc+=10;
     else if(s.id==='apmax') sc+=8; else sc+=8;
   } else if(q2==='主要用 Mac'){
     if(s.id==='apmax') sc+=15; else if(s.id==='appro2') sc+=12; else sc+=8;
-  } else sc+=8; 
+  } else sc+=8; // iPhone
 
+  // 价格敏感度 (15pts)
   if(q4!=='价格更友好'){
     if(s.n<=1399) sc+=8; else if(s.n<=1899) sc+=6; else sc+=3;
   }
@@ -833,7 +832,7 @@ function match(){
       tag=ipTagFirstTimer(q3,q4,primary);
       why=ipWhyFirstTimer(q3,q4,primary,alt);
       altDiff=ipAltDiffFirstTimer(q3,q4,primary,alt);
-      insight=null;
+      insight=null; // 首次入门用户不显示"升级洞察"，避免语义错位
     } else {
       const r=matchIP(q2,q3,q4);
       primary=r.primary; alt=r.alt;
@@ -842,33 +841,15 @@ function match(){
       altDiff=ipAltDiff(primary,alt);
       insight=ipInsight(q2,q3,q4,primary);
     }
-    cmpFields=IP_CMP_FIELDS; 
-    pCmp={...primary.cmp}; 
-    aCmp={...alt.cmp};
-
-    const formatCmpPriceStr = (sku) => sku.isOld ? `历史官方参考价<br><strong>RMB ${sku.n} 起</strong><br><span style="color:rgba(175,40,30,.85);font-size:11px;display:inline-block;margin-top:4px;font-weight:600;">当前 Apple Store 已下架</span>` : `<strong>RMB ${sku.n} 起</strong>`;
-
-    pCmp['价格'] = formatCmpPriceStr(primary);
-    aCmp['价格'] = formatCmpPriceStr(alt);
-
-    primary = {
-      name: primary.name, price: `RMB ${primary.n} 起`, isOld: primary.isOld,
-      bullets: primary.b, accessories: primary.acc, note: primary.note||null
-    };
-    alt = {
-      name: alt.name, price: `RMB ${alt.n} 起`, diff: altDiff, isOld: alt.isOld
-    };
+    cmpFields=IP_CMP_FIELDS; pCmp=primary.cmp; aCmp=alt.cmp;
     storeUrl='https://www.apple.com.cn/shop/buy-iphone';
-
   } else if(branch==='macbook'){
     const r=matchMB(q2,q3,q4);
     primary=r.primary; alt=r.alt;
     tag=primary.tag;
     why=mbWhy(q2,q3,q4,primary,alt);
     altDiff=mbAltDiff(primary,alt);
-    cmpFields=MB_CMP_FIELDS; pCmp={...primary.cmp}; aCmp={...alt.cmp};
-    pCmp['价格'] = `<strong>${primary.price}</strong>`;
-    aCmp['价格'] = `<strong>${alt.price}</strong>`;
+    cmpFields=MB_CMP_FIELDS; pCmp=primary.cmp; aCmp=alt.cmp;
     storeUrl='https://www.apple.com.cn/shop/buy-mac';
   } else {
     const r=matchAP(q2,q3,q4);
@@ -876,9 +857,7 @@ function match(){
     tag=apTag(q3,q4);
     why=apWhy(q2,q3,q4,primary,alt);
     altDiff=apAltDiff(primary,alt);
-    cmpFields=AP_CMP_FIELDS; pCmp={...primary.cmp}; aCmp={...alt.cmp};
-    pCmp['价格'] = `<strong>${primary.price}</strong>`;
-    aCmp['价格'] = `<strong>${alt.price}</strong>`;
+    cmpFields=AP_CMP_FIELDS; pCmp=primary.cmp; aCmp=alt.cmp;
     storeUrl='https://www.apple.com.cn/shop/buy-airpods';
   }
 
@@ -887,8 +866,9 @@ function match(){
 
   return {
     branch,q2,q3,q4,tag,why,insight,storeUrl,
-    primary, alt,
-    accessories:primary.accessories||primary.acc||[],
+    primary:{name:primary.name,price:primary.price,bullets:primary.b,accessories:primary.acc,note:primary.note||null},
+    alt:{name:alt.name,price:alt.price,diff:altDiff},
+    accessories:primary.acc||[],
     compareFields:cmpFields,
     compare,
   };
@@ -904,10 +884,10 @@ const el={
   q3Title:$('#q3Title'),q3Hint:$('#q3Hint'),q3Grid:$('#q3Grid'),
   q4Title:$('#q4Title'),q4Hint:$('#q4Hint'),q4Grid:$('#q4Grid'),
   resultSub:$('#resultSub'),reasonTag:$('#reasonTag'),
-  primaryName:$('#primaryName'),primaryPrice:$('#primaryPrice'),primaryOldLabel:$('#primaryOldLabel'),primaryBullets:$('#primaryBullets'),primaryWhy:$('#primaryWhy'),
+  primaryName:$('#primaryName'),primaryPrice:$('#primaryPrice'),primaryBullets:$('#primaryBullets'),primaryWhy:$('#primaryWhy'),
   productNote:$('#productNote'),productNoteText:$('#productNoteText'),
   insightWrap:$('#insightWrap'),insightText:$('#insightText'),
-  altName:$('#altName'),altDiff:$('#altDiff'),altPrice:$('#altPrice'),altOldLabel:$('#altOldLabel'),altOldBadge:$('#altOldBadge'),
+  altName:$('#altName'),altDiff:$('#altDiff'),altPrice:$('#altPrice'),
   accessoryGrid:$('#accessoryGrid'),
   btnStore:$('#btnStore'),btnCompare:$('#btnCompare'),
   compareWrap:$('#compareWrap'),compareBody:$('#compareBody'),
@@ -976,6 +956,7 @@ function renderQ2(){
 }
 
 function renderQ3(){
+  // iPhone 首次入门用户使用专属问题
   const isFirstTimer = state.branch==='iphone' && state.answers.q2==='Android / 第一次用 iPhone';
   const q = isFirstTimer ? QS_IP_FIRST.q3 : QS[state.branch].q3;
   el.q3Title.textContent=q.title; el.q3Hint.textContent=q.hint;
@@ -984,6 +965,7 @@ function renderQ3(){
 }
 
 function renderQ4(){
+  // iPhone 首次入门用户使用专属问题
   const isFirstTimer = state.branch==='iphone' && state.answers.q2==='Android / 第一次用 iPhone';
   const q = isFirstTimer ? QS_IP_FIRST.q4 : QS[state.branch].q4;
   el.q4Title.textContent=q.title; el.q4Hint.textContent=q.hint;
@@ -1004,19 +986,8 @@ function renderResult(m){
   el.primaryBullets.innerHTML=(m.primary.bullets||[]).map(x=>`<li>${esc(x)}</li>`).join('');
   el.primaryWhy.textContent=m.why;
 
-  if (m.primary.isOld) {
-    el.primaryOldLabel.style.display = 'block';
-    el.productNote.style.display = '';
-    el.productNoteText.innerHTML = '<strong>当前 Apple Store 已下架</strong>' + (m.primary.note ? '<br>' + esc(m.primary.note) : '');
-  } else {
-    el.primaryOldLabel.style.display = 'none';
-    if (m.primary.note) {
-      el.productNote.style.display = '';
-      el.productNoteText.textContent = m.primary.note;
-    } else {
-      el.productNote.style.display = 'none';
-    }
-  }
+  if(m.primary.note){ el.productNote.style.display=''; el.productNoteText.textContent=m.primary.note; }
+  else el.productNote.style.display='none';
 
   if(m.insight&&m.branch==='iphone'){ el.insightWrap.style.display=''; el.insightText.textContent=m.insight; }
   else el.insightWrap.style.display='none';
@@ -1024,14 +995,6 @@ function renderResult(m){
   el.altName.textContent=m.alt.name;
   el.altPrice.textContent=m.alt.price;
   el.altDiff.textContent=m.alt.diff;
-  
-  if(m.alt.isOld) {
-    el.altOldLabel.style.display = 'block';
-    el.altOldBadge.style.display = 'block';
-  } else {
-    el.altOldLabel.style.display = 'none';
-    el.altOldBadge.style.display = 'none';
-  }
 
   el.accessoryGrid.innerHTML=(m.accessories||[]).slice(0,3).map(a=>
     `<div class="card mini"><p class="miniTitle">${esc(a.n)}</p><p class="miniDesc">${esc(a.w)}</p></div>`
@@ -1041,7 +1004,7 @@ function renderResult(m){
   if(el.thAlt) el.thAlt.textContent=m.alt.name;
   el.compareBody.innerHTML=(m.compareFields||[]).map(f=>{
     const r=m.compare[f]||['—','—'];
-    return `<tr><td><strong>${esc(f)}</strong></td><td>${r[0]}</td><td>${r[1]}</td></tr>`;
+    return `<tr><td><strong>${esc(f)}</strong></td><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`;
   }).join('');
 
   state.compareOpen=false; el.compareWrap.classList.remove('open');
@@ -1050,9 +1013,7 @@ function renderResult(m){
 }
 
 function buildSaveText(m){
-  const pTag = m.primary.isOld ? '【历史官方参考价 / 当前 Apple Store 已下架】' : '';
-  const aTag = m.alt.isOld ? '【历史官方参考价 / 当前 Apple Store 已下架】' : '';
-  return `【Help Me Choose 推荐摘要】\n\n主推：${m.primary.name} ${pTag}（${m.primary.price}）\n备选：${m.alt.name} ${aTag}（${m.alt.price}）\n\n${m.why}\n\n搭配推荐：${(m.accessories||[]).map(a=>a.n).join('、')}\n\n────────────\n在 Apple Store 查看：${m.storeUrl}`;
+  return `【Help Me Choose 推荐摘要】\n\n主推：${m.primary.name}（${m.primary.price}）\n备选：${m.alt.name}（${m.alt.price}）\n\n${m.why}\n\n搭配推荐：${(m.accessories||[]).map(a=>a.n).join('、')}\n\n────────────\n在 Apple Store 查看：${m.storeUrl}`;
 }
 
 // ══ Events ═══════════════════════════════════════════════════

@@ -1,0 +1,1445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Help Me Choose</title>
+  <style>
+    :root{
+      --bg:#FFFFFF;
+      --text:#1D1D1F;
+      --muted:#6E6E73;
+      --gray:#F5F5F7;
+      --blue:#0071E3;
+      --border: rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --shadow-soft: 0 6px 18px rgba(0,0,0,.06);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}
+    .app{
+      min-height:100%;
+      display:flex;
+      justify-content:center;
+      padding:20px 14px 40px;
+    }
+    .shell{
+      width:100%;
+      max-width:560px;
+      margin:0 auto;
+    }
+    .top{
+      position:sticky;
+      top:0;
+      background:rgba(255,255,255,.85);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      padding:12px 0 10px;
+      z-index:10;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 6px 10px;
+    }
+    .brand .name{font-weight:600;letter-spacing:.2px;font-size:14px;color:rgba(29,29,31,.9)}
+    .brand .chip{font-size:12px;color:var(--muted);background:var(--gray);border:1px solid var(--border);padding:6px 10px;border-radius:999px;white-space:nowrap}
+    .progress{height:6px;background:rgba(0,0,0,.06);border-radius:999px;overflow:hidden;margin:0 6px}
+    .progress > div{height:100%;width:0%;background:var(--blue);border-radius:999px;transition:width .35s ease}
+    .stage{position:relative;padding-top:10px}
+    .screen{display:none;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease;padding:12px 6px 0}
+    .screen.active{display:block}
+    .screen.visible{opacity:1;transform:translateY(0)}
+    .screen.result-animate{transform:translateY(18px);transition:opacity .3s ease,transform .4s ease}
+
+    h1{margin:8px 0 10px;font-size:34px;line-height:1.12;letter-spacing:-0.02em}
+    h2{margin:6px 0 10px;font-size:22px;letter-spacing:-0.01em}
+    p{margin:0 0 18px;color:var(--muted);line-height:1.55}
+
+    .cardGrid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+    .card{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px 16px;
+      box-shadow:var(--shadow-soft);
+      cursor:pointer;
+      transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .card:hover{transform:translateY(-1px);box-shadow:var(--shadow);border-color:rgba(0,0,0,.12)}
+    .card:active{transform:translateY(0);box-shadow:var(--shadow-soft)}
+    .cardTitle{font-weight:700;font-size:18px;letter-spacing:-0.01em;margin:0 0 6px}
+    .cardDesc{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+    .cardMeta{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;font-size:12px;color:rgba(29,29,31,.85);background:var(--gray);border:1px solid var(--border);white-space:nowrap}
+    .arrow{width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:rgba(0,113,227,.10);color:var(--blue);border:1px solid rgba(0,113,227,.18);flex:0 0 auto}
+
+    .hero{background:linear-gradient(180deg,rgba(245,245,247,.9),rgba(255,255,255,1));border:1px solid var(--border);border-radius:calc(var(--radius) + 4px);padding:20px 16px;box-shadow:var(--shadow-soft)}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{height:48px;padding:0 16px;border-radius:999px;border:1px solid transparent;font-weight:600;font-size:14px;letter-spacing:.2px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .12s ease,box-shadow .12s ease,background .12s ease,border-color .12s ease}
+    .btn:active{transform:translateY(1px)}
+    .btnPrimary{background:var(--blue);color:#fff;box-shadow:0 10px 24px rgba(0,113,227,.18)}
+    .btnPrimary:hover{box-shadow:0 12px 28px rgba(0,113,227,.22)}
+    .btnSecondary{background:#fff;color:var(--text);border-color:rgba(0,0,0,.14);box-shadow:var(--shadow-soft)}
+    .btnSecondary:hover{border-color:rgba(0,0,0,.18);box-shadow:var(--shadow)}
+    .btnGhost{background:transparent;color:var(--text);border-color:rgba(0,0,0,.10)}
+    .btnGhost:hover{border-color:rgba(0,0,0,.16);background:rgba(0,0,0,.02)}
+    .btnFull{flex:1 1 180px}
+
+    .resultHeader{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    .resultStack{display:grid;gap:12px}
+    .bigCard{padding:18px 16px}
+    .bigTitle{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .productName{font-size:18px;font-weight:800;letter-spacing:-0.01em;margin:0}
+    .price{font-size:14px;font-weight:700;color:rgba(29,29,31,.86);background:var(--gray);border:1px solid var(--border);padding:8px 10px;border-radius:999px;white-space:nowrap}
+    .bullets{margin:10px 0 0;padding-left:18px;color:rgba(29,29,31,.88);line-height:1.6;font-size:14px}
+    .why{margin-top:12px;padding:12px 12px;background:rgba(0,113,227,.06);border:1px solid rgba(0,113,227,.14);border-radius:14px;color:rgba(29,29,31,.9);line-height:1.55;font-size:14px}
+    .subCards{display:grid;grid-template-columns:1fr;gap:10px}
+    .mini{padding:14px 14px;box-shadow:none;cursor:default}
+    .mini:hover{transform:none;box-shadow:none}
+    .miniTitle{margin:0;font-weight:800;letter-spacing:-0.01em;font-size:15px}
+    .miniDesc{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    .miniFooter{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .sectionTitle{margin:18px 0 10px;font-size:15px;font-weight:800;letter-spacing:-0.01em;color:rgba(29,29,31,.92)}
+
+    /* V4 新增：升级洞察卡片 */
+    .insightCard{margin-top:12px;padding:12px 14px;background:rgba(255,149,0,.07);border:1px solid rgba(255,149,0,.22);border-radius:14px;font-size:13px;line-height:1.55;color:rgba(29,29,31,.9)}
+    .insightCard strong{color:rgba(200,100,0,.9)}
+
+    .compareWrap{overflow:hidden;max-height:0;opacity:0;transform:translateY(-6px);transition:max-height .35s ease,opacity .25s ease,transform .25s ease}
+    .compareWrap.open{opacity:1;transform:translateY(0);max-height:800px}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:var(--radius);border:1px solid var(--border);background:#fff;box-shadow:var(--shadow-soft)}
+    th,td{text-align:left;padding:12px 12px;border-bottom:1px solid rgba(0,0,0,.06);vertical-align:top;font-size:13px;line-height:1.45}
+    th{background:var(--gray);font-weight:800;letter-spacing:-0.01em;color:rgba(29,29,31,.9)}
+    tr:last-child td{border-bottom:none}
+    .footerLink{margin-top:18px;display:inline-block;color:rgba(0,113,227,.95);text-decoration:none;font-weight:600;padding:8px 4px}
+    .footerLink:hover{text-decoration:underline}
+
+    .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}
+    .modalOverlay.show{display:flex}
+    .modal{width:100%;max-width:520px;background:#fff;border-radius:22px;border:1px solid rgba(255,255,255,.6);box-shadow:0 24px 70px rgba(0,0,0,.25);overflow:hidden;transform:translateY(10px);opacity:0;transition:transform .22s ease,opacity .22s ease}
+    .modalOverlay.show .modal{transform:translateY(0);opacity:1}
+    .modalHead{padding:14px 16px;background:rgba(245,245,247,.92);border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .modalTitle{font-weight:800;letter-spacing:-0.01em;font-size:14px;margin:0}
+    .iconBtn{width:36px;height:36px;border-radius:999px;border:1px solid rgba(0,0,0,.10);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .12s ease,border-color .12s ease}
+    .iconBtn:hover{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.14)}
+    .modalBody{padding:14px 16px 16px}
+    .textarea{width:100%;min-height:120px;padding:12px 12px;border-radius:16px;border:1px solid rgba(0,0,0,.12);background:#fff;font-size:13px;line-height:1.55;color:rgba(29,29,31,.92);resize:vertical;outline:none}
+    .hint{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.45}
+
+    @media (min-width: 740px){
+      .app{padding:28px 18px 60px}
+      .cardGrid{grid-template-columns:1fr 1fr 1fr}
+      .subCards{grid-template-columns:1fr 1fr}
+      h1{font-size:40px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="shell" role="application" aria-label="Help Me Choose">
+    <div class="top">
+      <div class="brand">
+        <div class="name">Help Me Choose</div>
+        <div class="chip" id="chipStatus">准备开始</div>
+      </div>
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+
+    <main class="stage">
+      <!-- 欢迎页 -->
+      <section class="screen" id="screen-welcome">
+        <div class="hero">
+          <h1>Help Me Choose</h1>
+          <p>告诉我你现在的情况，我来帮你选最适合你的那款</p>
+          <div class="btnRow">
+            <button class="btn btnPrimary btnFull" id="btnStart">开始选购</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q1: 品类 -->
+      <section class="screen" id="screen-q1">
+        <h2>你现在更想买哪类产品？</h2>
+        <p>选一个方向，我们根据你的真实情况来推荐最适合的款式。</p>
+        <div class="cardGrid" id="q1Grid"></div>
+      </section>
+
+      <!-- Q2: 预算状态 -->
+      <section class="screen" id="screen-q2">
+        <h2 id="q2Title"></h2>
+        <p id="q2Hint"></p>
+        <div class="cardGrid" id="q2Grid"></div>
+      </section>
+
+      <!-- Q3: 分支问题 -->
+      <section class="screen" id="screen-q3">
+        <h2 id="q3Title"></h2>
+        <p id="q3Hint"></p>
+        <div class="cardGrid" id="q3Grid"></div>
+      </section>
+
+      <!-- Q4: 分支问题 -->
+      <section class="screen" id="screen-q4">
+        <h2 id="q4Title"></h2>
+        <p id="q4Hint"></p>
+        <div class="cardGrid" id="q4Grid"></div>
+      </section>
+
+      <!-- 结果页 -->
+      <section class="screen result-animate" id="screen-result">
+        <div class="resultHeader">
+          <h2 style="margin:0">这是为你挑选的推荐</h2>
+          <p id="resultSub" style="margin:0"></p>
+        </div>
+        <div class="resultStack">
+          <!-- 主推 -->
+          <div class="card bigCard" id="primaryCard" style="cursor:default">
+            <div class="bigTitle">
+              <div>
+                <p class="pill" id="reasonTag" style="margin:0 0 10px;display:inline-flex"></p>
+                <p class="productName" id="primaryName"></p>
+              </div>
+              <div class="price" id="primaryPrice"></div>
+            </div>
+            <ul class="bullets" id="primaryBullets"></ul>
+            <div class="why" id="primaryWhy"></div>
+          </div>
+
+          <!-- V4新增：升级洞察（仅iPhone分支显示） -->
+          <div id="insightWrap" style="display:none">
+            <div class="insightCard" id="insightText"></div>
+          </div>
+
+          <!-- 备选 -->
+          <div>
+            <div class="sectionTitle">备选款</div>
+            <div class="subCards">
+              <div class="card mini" id="altCard">
+                <p class="miniTitle" id="altName"></p>
+                <p class="miniDesc" id="altDiff"></p>
+                <div class="miniFooter">
+                  <span class="pill">备选价格</span>
+                  <span class="price" id="altPrice"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 配件 -->
+          <div>
+            <div class="sectionTitle">搭配推荐</div>
+            <div class="subCards" id="accessoryGrid"></div>
+          </div>
+
+          <!-- CTA -->
+          <div>
+            <div class="sectionTitle">下一步</div>
+            <div class="btnRow">
+              <button class="btn btnPrimary btnFull" id="btnStore">在 Apple Store 查看</button>
+              <button class="btn btnSecondary btnFull" id="btnCompare">对比主推 vs 备选</button>
+              <button class="btn btnGhost btnFull" id="btnSave">保存这套推荐</button>
+            </div>
+          </div>
+
+          <!-- 对比表 -->
+          <div class="compareWrap" id="compareWrap">
+            <div style="height:10px"></div>
+            <table id="compareTable">
+              <thead>
+                <tr>
+                  <th style="width:26%">项目</th>
+                  <th id="thPrimary" style="width:37%">主推</th>
+                  <th id="thAlt" style="width:37%">备选</th>
+                </tr>
+              </thead>
+              <tbody id="compareBody"></tbody>
+            </table>
+          </div>
+
+          <a class="footerLink" href="#" id="linkRestart">重新来过</a>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- 保存弹窗 -->
+<div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modalHead">
+      <p class="modalTitle">可复制的推荐摘要</p>
+      <button class="iconBtn" id="btnCloseModal">×</button>
+    </div>
+    <div class="modalBody">
+      <textarea class="textarea" id="saveText" readonly></textarea>
+      <div class="btnRow" style="margin-top:12px">
+        <button class="btn btnPrimary btnFull" id="btnCopy">复制摘要</button>
+        <button class="btn btnSecondary btnFull" id="btnSelectAll">全选</button>
+      </div>
+      <p class="hint">提示：你也可以直接长按文本进行复制。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = sel => document.querySelector(sel);
+  const el = {
+    chipStatus: $("#chipStatus"),
+    progressBar: $("#progressBar"),
+    screens: {
+      welcome: $("#screen-welcome"),
+      q1: $("#screen-q1"),
+      q2: $("#screen-q2"),
+      q3: $("#screen-q3"),
+      q4: $("#screen-q4"),
+      result: $("#screen-result"),
+    },
+    btnStart: $("#btnStart"),
+    q1Grid: $("#q1Grid"),
+    q2Title: $("#q2Title"), q2Hint: $("#q2Hint"), q2Grid: $("#q2Grid"),
+    q3Title: $("#q3Title"), q3Hint: $("#q3Hint"), q3Grid: $("#q3Grid"),
+    q4Title: $("#q4Title"), q4Hint: $("#q4Hint"), q4Grid: $("#q4Grid"),
+    resultSub: $("#resultSub"),
+    reasonTag: $("#reasonTag"),
+    primaryName: $("#primaryName"),
+    primaryPrice: $("#primaryPrice"),
+    primaryBullets: $("#primaryBullets"),
+    primaryWhy: $("#primaryWhy"),
+    insightWrap: $("#insightWrap"),
+    insightText: $("#insightText"),
+    altName: $("#altName"), altDiff: $("#altDiff"), altPrice: $("#altPrice"),
+    accessoryGrid: $("#accessoryGrid"),
+    btnStore: $("#btnStore"),
+    btnCompare: $("#btnCompare"),
+    compareWrap: $("#compareWrap"),
+    compareBody: $("#compareBody"),
+    thPrimary: $("#thPrimary"), thAlt: $("#thAlt"),
+    btnSave: $("#btnSave"),
+    linkRestart: $("#linkRestart"),
+    modalOverlay: $("#modalOverlay"),
+    btnCloseModal: $("#btnCloseModal"),
+    saveText: $("#saveText"),
+    btnCopy: $("#btnCopy"),
+    btnSelectAll: $("#btnSelectAll"),
+  };
+
+  const state = {
+    step: "welcome",
+    branch: null,
+    answers: { q1: null, q2: null, q3: null, q4: null },
+    compareOpen: false,
+    matched: null,
+  };
+
+  // ─── 通用预算倾向 Q2 ───
+  const BUDGET_Q = {
+    title: "这次你更接近哪种预算状态？",
+    hint: "这会直接影响我们推荐更克制、均衡，还是一步到位的路线。",
+    options: [
+      { label: "控制预算，够用就好",       desc: "更偏性价比路线，不为用不到的功能多花钱。" },
+      { label: "预算中间档，想买得均衡",   desc: "想在体验与价格之间找到更踏实的平衡点。" },
+      { label: "愿意多花一点，换更完整体验", desc: "不介意多花一些，希望关键体验更齐全。" },
+      { label: "预算基本不设限，想一步到位", desc: "减少后悔成本，直接选最适合自己的高配路线。" },
+    ],
+  };
+
+  // ══════════════════════════════════════════════════════════
+  // iPhone 分支 — V4 重新设计
+  // Q3: 你现在用的是什么手机？（升级起点）
+  // Q4: 这次换机最主要是因为？（升级动机）
+  // ══════════════════════════════════════════════════════════
+  const IPHONE = {
+    label: "iPhone",
+    desc: "想换一台更适合你的手机",
+    q3: {
+      title: "你现在用的是什么手机？",
+      hint: "告诉我你的起点，我才能判断这次升级对你来说值不值、该怎么选。",
+      options: [
+        { label: "安卓手机 / 第一次用 iPhone", desc: "全新进入苹果生态，没有历史包袱。" },
+        { label: "iPhone 13 或更早款（2021年及之前）", desc: "已经用了 3 年以上，升级空间很大。" },
+        { label: "iPhone 14 系列（2022年款）", desc: "用了约 2 年，看看有没有值得升级的理由。" },
+        { label: "iPhone 15 系列（2023年款）", desc: "才用 1 年多，需要认真想想换机理由。" },
+      ],
+    },
+    q4: {
+      title: "这次换机最主要是因为？",
+      hint: "这是最关键的一步——换机动机决定了哪款真正值得推荐给你。",
+      options: [
+        { label: "续航撑不住，每天要充好几次", desc: "续航是你现在最大的痛点。" },
+        { label: "拍照效果不满意，想要更好画质", desc: "摄影升级是你最在意的。" },
+        { label: "手机变慢变卡，用起来不流畅",   desc: "性能提升对你来说很重要。" },
+        { label: "想体验新功能，或者是买来送人",  desc: "追新或送礼场景。" },
+      ],
+    },
+    compareFields: ["价格", "屏幕尺寸", "芯片", "相机能力", "存储版本", "电池容量/续航", "适合人群"],
+
+    // ── 规则表（优先级：特异性越高，得分越高；越靠前的规则在同分时优先） ──
+    // 字段说明：tilt=预算状态，prev=上一台机型，reason=换机原因
+    rules: [
+
+      // ─── 安卓 / 新用户 ───────────────────────────────────
+      {
+        id: "ip-android-budget",
+        match: { tilt: "控制预算，够用就好", prev: "安卓手机 / 第一次用 iPhone", reason: "*" },
+        primary: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          bullets: ["A18 芯片性能远超安卓同价位旗舰", "进入苹果生态最合理的起点", "无需为你暂时用不到的 Pro 功能多花钱"] },
+        alt: { name: "iPhone 15 128GB", price: "RMB 4999 起",
+          diff: "更省钱的入门选择；如果你的预算真的很紧，15 也能让你完整体验苹果生态" },
+        tag: "生态入门首选",
+        insight: "从安卓换过来，16 标准版的 A18 芯片和系统流畅度已经远超安卓同价位旗舰。暂时不需要 Pro。",
+        accessories: [
+          { name: "透明 MagSafe 保护壳", why: "新手机第一步，保护壳不能少，透明款不挡颜色" },
+          { name: "编织 USB-C 数据线", why: "换了苹果就换 USB-C，编织款更耐用" },
+        ],
+        compare: {
+          "价格": ["RMB 5999 起", "RMB 4999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A18（更新一代）", "A16（上上代，仍够用）"],
+          "相机能力": ["4800 万主摄，日常更清晰", "4800 万主摄，略偏旧但够用"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 3561 mAh｜全天续航", "约 3349 mAh｜日常够用"],
+          "适合人群": ["想要最新一代体验的新用户", "预算极度有限、只想进生态"],
+        },
+      },
+      {
+        id: "ip-android-balanced",
+        match: { tilt: "预算中间档，想买得均衡", prev: "安卓手机 / 第一次用 iPhone", reason: "*" },
+        primary: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          bullets: ["256GB 容量未来几年不会焦虑", "A18 芯片保证长线流畅体验", "进入苹果生态最稳妥的均衡选择"] },
+        alt: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          diff: "省 500 元的选择；128GB 对大多数用户够用，看你日常存储习惯" },
+        tag: "生态入门均衡款",
+        insight: "从安卓转过来，256GB 比 128GB 多花 500 元，但可以用 3-4 年不换机不慌张。很值得。",
+        accessories: [
+          { name: "MagSafe 保护壳", why: "磁吸配件生态是苹果的核心体验，从一开始就用上" },
+          { name: "MagSafe 充电器", why: "随手一放就充电，比插线方便很多" },
+        ],
+        compare: {
+          "价格": ["RMB 6499 起", "RMB 5999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A18", "A18"],
+          "相机能力": ["4800 万主摄，日常高水准", "同款相机"],
+          "存储版本": ["256GB（长线更踏实）", "128GB（更克制）"],
+          "电池容量/续航": ["约 3561 mAh｜全天续航", "约 3561 mAh｜同级续航"],
+          "适合人群": ["想长期使用、不想存储焦虑", "预算偏紧、够用就行"],
+        },
+      },
+      {
+        id: "ip-android-premium",
+        match: { tilt: "愿意多花一点，换更完整体验", prev: "安卓手机 / 第一次用 iPhone", reason: "*" },
+        primary: { name: "iPhone 16 Pro 256GB", price: "RMB 8999 起",
+          bullets: ["Pro 级影像系统直接碾压安卓同价位", "Action Button 和 Camera Control 带来更完整的使用体验", "一步进入苹果生态最顶级的日常体验"] },
+        alt: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          diff: "如果你愿意降一档，标准版的日常体验也很完整，省出 2500 元可以买 AirPods" },
+        tag: "生态入门直步旗舰",
+        insight: "既然是第一次入苹果，愿意多花一点的话，16 Pro 会让你在接下来 3-4 年都不会觉得缺什么。",
+        accessories: [
+          { name: "钛金属原色保护壳", why: "Pro 的钛金属机身质感很好，壳要配得上" },
+          { name: "AirPods 4 主动降噪版", why: "手机+耳机是苹果生态最顺畅的搭配，一步到位" },
+        ],
+        compare: {
+          "价格": ["RMB 8999 起", "RMB 6499 起"],
+          "屏幕尺寸": ["6.3 寸 ProMotion", "6.1 寸"],
+          "芯片": ["A18 Pro", "A18"],
+          "相机能力": ["Pro 级三摄系统 + 5 倍长焦", "4800 万主摄，无长焦"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 3582 mAh｜续航更长", "约 3561 mAh｜全天够用"],
+          "适合人群": ["想一步体验完整苹果旗舰", "预算回归均衡档的合理选择"],
+        },
+      },
+
+      // ─── iPhone 13 及以前（用了 3 年以上，升级空间大）───────────────
+      {
+        id: "ip-old-budget-battery",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 13 或更早款（2021年及之前）", reason: "续航撑不住，每天要充好几次" },
+        primary: { name: "iPhone 16 Plus 128GB", price: "RMB 6999 起",
+          bullets: ["4674 mAh 超大电池，两天一充完全可以做到", "比 13 系列续航提升超 50%", "大屏看视频也更舒服"] },
+        alt: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          diff: "省 1000 元但续航不如 Plus；如果预算很紧，16 的续航也比 13 好很多" },
+        tag: "续航痛点终结者",
+        insight: "你现在用 13 系列，续航已经是几年用下来的老电池。换到 16 Plus 是针对你痛点最精准的升级，电池容量是 13 的将近两倍。",
+        accessories: [
+          { name: "MagSafe 壳", why: "大屏更需要保护，MagSafe 壳保护性更好" },
+          { name: "MagSafe 充电宝", why: "既然关注续航，出门备一个 MagSafe 充电宝更安心" },
+        ],
+        compare: {
+          "价格": ["RMB 6999 起", "RMB 5999 起"],
+          "屏幕尺寸": ["6.7 寸大屏", "6.1 寸"],
+          "芯片": ["A18", "A18"],
+          "相机能力": ["4800 万主摄，大幅优于 13 系列", "同款相机"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 4674 mAh｜轻松两天一充", "约 3561 mAh｜全天续航"],
+          "适合人群": ["续航是首要痛点，愿意接受大屏", "续航需求一般，更在意手机轻巧"],
+        },
+      },
+      {
+        id: "ip-old-budget-camera",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 13 或更早款（2021年及之前）", reason: "拍照效果不满意，想要更好画质" },
+        primary: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          bullets: ["4800 万主摄比 13 系列提升巨大", "A18 芯片让计算摄影更快更准", "日常拍照拍人完全足够"] },
+        alt: { name: "iPhone 16 Pro 128GB", price: "RMB 7999 起",
+          diff: "多花 2000 元可以获得 5 倍长焦；如果你经常拍远景或风景，Pro 更值" },
+        tag: "拍照大升级",
+        insight: "从 13 到 16，相机系统升级了整整两代。即使是标准版，4800 万主摄对你来说都是质的飞跃。",
+        accessories: [
+          { name: "MagSafe 壳", why: "保护好相机模组，尤其是三摄区域" },
+          { name: "MagSafe 自拍支架", why: "拍照拍视频更稳，远程拍摄更方便" },
+        ],
+        compare: {
+          "价格": ["RMB 5999 起", "RMB 7999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.3 寸 ProMotion"],
+          "芯片": ["A18", "A18 Pro"],
+          "相机能力": ["4800 万主摄，无长焦", "Pro 三摄 + 5 倍长焦"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 3561 mAh｜全天续航", "约 3582 mAh｜续航更优"],
+          "适合人群": ["普通日常拍照升级", "经常拍风景/远景/有创作需求"],
+        },
+      },
+      {
+        id: "ip-old-budget-general",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 13 或更早款（2021年及之前）", reason: "*" },
+        primary: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          bullets: ["A18 芯片性能比 13 系列提升巨大，卡顿彻底解决", "从 13 升级到 16，每一项都有显著提升", "性价比最高的升级选择"] },
+        alt: { name: "iPhone 15 128GB", price: "RMB 4999 起",
+          diff: "省 1000 元，性能同样远超 13 系列，如果预算实在有限可以考虑" },
+        tag: "3年大升级",
+        insight: "你已经用了 3 年以上，换 16 标准版每一项都会有明显的提升感——速度、相机、续航全面升级。",
+        accessories: [
+          { name: "透明 MagSafe 壳", why: "换了新手机，保护壳先配上" },
+          { name: "MagSafe 充电器", why: "新手机搭上 MagSafe 充电，体验全面升级" },
+        ],
+        compare: {
+          "价格": ["RMB 5999 起", "RMB 4999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A18（比 A15 快约 30%）", "A16（也比 A15 快约 20%）"],
+          "相机能力": ["4800 万主摄", "4800 万主摄"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 3561 mAh", "约 3349 mAh"],
+          "适合人群": ["想要最新一代综合提升", "预算极限，但也要有效升级"],
+        },
+      },
+      {
+        id: "ip-old-premium-camera",
+        match: { tilt: ["愿意多花一点，换更完整体验", "预算基本不设限，想一步到位"], prev: "iPhone 13 或更早款（2021年及之前）", reason: "拍照效果不满意，想要更好画质" },
+        primary: { name: "iPhone 16 Pro 256GB", price: "RMB 8999 起",
+          bullets: ["Pro 级三摄系统 + 5 倍长焦，拍摄能力全面升级", "ProMotion 120Hz 屏幕，对比 13 感受质变", "256GB 未来几年不会存储焦虑"] },
+        alt: { name: "iPhone 16 Pro Max 256GB", price: "RMB 9999 起",
+          diff: "如果你还需要更长续航和更大屏幕，Pro Max 更合适" },
+        tag: "拍照跨代大升级",
+        insight: "从 13 系列到 16 Pro，相机系统差了整整 3 代。5 倍光学变焦、ProRAW、Cinema 模式，都是 13 完全没有的。",
+        accessories: [
+          { name: "钛金属保护壳", why: "Pro 的钛金属边框值得搭配有质感的壳" },
+          { name: "AirPods Pro 2", why: "Pro 手机搭配 Pro 耳机，影音体验一步到位" },
+        ],
+        compare: {
+          "价格": ["RMB 8999 起", "RMB 9999 起"],
+          "屏幕尺寸": ["6.3 寸 ProMotion", "6.9 寸 ProMotion 大屏"],
+          "芯片": ["A18 Pro", "A18 Pro"],
+          "相机能力": ["Pro 三摄 + 5 倍长焦", "同款相机系统"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 3582 mAh｜更优于标准版", "约 4685 mAh｜超强续航"],
+          "适合人群": ["拍照优先 + 想要完整体验", "大屏 + 拍照 + 续航全面旗舰"],
+        },
+      },
+
+      // ─── iPhone 14（用了约 2 年，需要理由升级）───────────────────
+      {
+        id: "ip-14-budget-battery",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 14 系列（2022年款）", reason: "续航撑不住，每天要充好几次" },
+        primary: { name: "iPhone 16 Plus 128GB", price: "RMB 6999 起",
+          bullets: ["4674 mAh 电池是 14 系列的将近 2 倍", "续航提升是 14 系列最值得升级的理由", "大屏追剧更舒服"] },
+        alt: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          diff: "省 1000 元，续航也比 14 好很多，如果不喜欢大屏可以选标准版" },
+        tag: "续航是最值得换的理由",
+        insight: "如果只是日常卡顿，14 换 16 没有那么大必要。但续航确实是 14 系列的软肋，16 Plus 的电池容量直接翻倍。",
+        accessories: [
+          { name: "MagSafe 壳", why: "大屏机更需要手感好的保护壳" },
+          { name: "MagSafe 充电宝", why: "出门携带，续航焦虑彻底解决" },
+        ],
+        compare: {
+          "价格": ["RMB 6999 起", "RMB 5999 起"],
+          "屏幕尺寸": ["6.7 寸大屏", "6.1 寸"],
+          "芯片": ["A18", "A18"],
+          "相机能力": ["4800 万主摄（比 14 系列大幅升级）", "同款相机"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 4674 mAh｜轻松两天一充", "约 3561 mAh｜全天够用"],
+          "适合人群": ["续航是首要原因，愿意接受大屏", "续航需求一般，更重手机便携"],
+        },
+      },
+      {
+        id: "ip-14-budget-camera",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 14 系列（2022年款）", reason: "拍照效果不满意，想要更好画质" },
+        primary: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          bullets: ["4800 万主摄比 14 系列提升明显", "视频防抖和低光拍摄体验更好", "性价比最高的拍照升级路径"] },
+        alt: { name: "iPhone 16 Pro 128GB", price: "RMB 7999 起",
+          diff: "再多花 2000 元可以获得 5 倍长焦；经常拍风景/远景用户更值得" },
+        tag: "拍照升级值得换",
+        insight: "14 换 16，相机升级了整整两代，4800 万主摄 vs 14 系列的 1200 万，低光和细节都会有明显提升。",
+        accessories: [
+          { name: "MagSafe 壳", why: "保护相机模组" },
+          { name: "MagSafe 自拍支架", why: "拍照更稳更灵活" },
+        ],
+        compare: {
+          "价格": ["RMB 5999 起", "RMB 7999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.3 寸 ProMotion"],
+          "芯片": ["A18", "A18 Pro"],
+          "相机能力": ["4800 万主摄，比 14 大幅提升", "Pro 三摄 + 5 倍长焦"],
+          "存储版本": ["128GB", "128GB"],
+          "电池容量/续航": ["约 3561 mAh", "约 3582 mAh"],
+          "适合人群": ["日常拍照升级，预算控制", "拍照是核心诉求，预算更充裕"],
+        },
+      },
+      {
+        id: "ip-14-budget-general",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 14 系列（2022年款）", reason: "*" },
+        primary: { name: "iPhone 15 256GB", price: "RMB 6499 起",
+          bullets: ["比 16 便宜 500 元但相机和续航提升也很明显", "256GB 容量比全新 16 128GB 更实用", "对 14 用户来说每一项都有感知提升"] },
+        alt: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          diff: "如果更想要最新芯片和系统支持，16 128GB 和 15 256GB 价格相近，各有取舍" },
+        tag: "旧款高容量 vs 新款低容量",
+        insight: "这正是用户最纠结的问题：15 256GB（6499）vs 16 128GB（5999）。用 14 的人，15 的升级已经很明显；多 128GB 存储可能比新一代芯片更实用。",
+        accessories: [
+          { name: "透明 MagSafe 壳", why: "保护新机，同时展示机身颜色" },
+          { name: "MagSafe 充电器", why: "新机标配，充电体验升级" },
+        ],
+        compare: {
+          "价格": ["RMB 6499 起", "RMB 5999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A16（旧一代，仍非常流畅）", "A18（最新一代）"],
+          "相机能力": ["4800 万主摄，比 14 大幅提升", "4800 万主摄，同级水准"],
+          "存储版本": ["256GB（更宽裕）", "128GB（更省钱）"],
+          "电池容量/续航": ["约 3349 mAh｜日常够用", "约 3561 mAh｜更好一些"],
+          "适合人群": ["更在意存储不焦虑", "更在意最新芯片和系统支持"],
+        },
+      },
+
+      // ─── iPhone 15（1 年多，换机需要充分理由）────────────────────
+      {
+        id: "ip-15-battery",
+        match: { prev: "iPhone 15 系列（2023年款）", reason: "续航撑不住，每天要充好几次" },
+        primary: { name: "iPhone 16 Plus 256GB", price: "RMB 6999 起",
+          bullets: ["从 15 升级最值得的理由就是电池", "4674 mAh vs 15 系列约 3349 mAh，续航几乎翻倍", "256GB 让你下一次换机还早得很"] },
+        alt: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          diff: "标准版续航也比 15 好，轻巧一些，省 500 元" },
+        tag: "15用户换机最值的理由",
+        insight: "你用 15，正常使用一年多，手机本身不慢。续航是 15 系列的软肋。换 16 Plus 是最有针对性的一次升级。",
+        accessories: [
+          { name: "MagSafe 壳", why: "大屏机的手感保护都更重要" },
+          { name: "MagSafe 充电宝", why: "彻底解决续航焦虑" },
+        ],
+        compare: {
+          "价格": ["RMB 6999 起", "RMB 6499 起"],
+          "屏幕尺寸": ["6.7 寸大屏", "6.1 寸"],
+          "芯片": ["A18（比 15 快约 20%）", "A18"],
+          "相机能力": ["4800 万主摄，略优于 15 系列", "同款"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 4674 mAh｜两天一充可以做到", "约 3561 mAh｜明显好于 15"],
+          "适合人群": ["续航是换机首要原因，接受大屏", "续航需求一般，不想要大屏"],
+        },
+      },
+      {
+        id: "ip-15-camera",
+        match: { prev: "iPhone 15 系列（2023年款）", reason: "拍照效果不满意，想要更好画质" },
+        primary: { name: "iPhone 16 Pro 256GB", price: "RMB 8999 起",
+          bullets: ["16 Pro 的 5 倍长焦是 15 标准版没有的关键升级", "Camera Control 实体快门键让拍照更直觉", "ProMotion 120Hz 屏幕查看照片更细腻"] },
+        alt: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          diff: "如果长焦对你不重要，16 标准版拍照也比 15 有提升，省 2500 元" },
+        tag: "15用户拍照升级看这里",
+        insight: "从 15 标准版升级到 16 标准版，拍照提升有限。但升到 16 Pro 能获得真正不同的相机系统——5 倍长焦是质的差距。",
+        accessories: [
+          { name: "钛金属保护壳", why: "Pro 系列值得搭配有质感的壳" },
+          { name: "AirPods Pro 2", why: "手机升级到 Pro，耳机也配上" },
+        ],
+        compare: {
+          "价格": ["RMB 8999 起", "RMB 6499 起"],
+          "屏幕尺寸": ["6.3 寸 ProMotion", "6.1 寸"],
+          "芯片": ["A18 Pro", "A18"],
+          "相机能力": ["Pro 三摄 + 5 倍长焦 + Camera Control", "4800 万主摄（升级有限）"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 3582 mAh｜比 15 好一些", "约 3561 mAh｜比 15 略好"],
+          "适合人群": ["拍照是换机核心原因", "拍照是次要原因，更关注整体均衡"],
+        },
+      },
+      {
+        id: "ip-15-budget-general",
+        match: { tilt: "控制预算，够用就好", prev: "iPhone 15 系列（2023年款）", reason: "*" },
+        primary: { name: "iPhone 15 系列", price: "你现在用的就是",
+          bullets: ["你的 iPhone 15 仍然是一台很好的手机", "A16 芯片和 4800 万相机在 2025 年依然够用", "暂时不升级，把预算用在更需要的地方"] },
+        alt: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          diff: "如果你有具体的换机理由（续航/相机），可以考虑 16；但单纯换新意义不大" },
+        tag: "暂时不建议升级",
+        insight: "说实话，iPhone 15 才用一年多，在预算有限的情况下，没有强烈的换机理由（续航/拍照痛点），暂时不建议升级。",
+        accessories: [
+          { name: "新换一个 MagSafe 壳", why: "换个喜欢的颜色，焕然一新，几十块钱解决" },
+          { name: "MagSafe 充电器", why: "如果还没有，现在补上也很值" },
+        ],
+        compare: {
+          "价格": ["持有成本：0", "RMB 6499 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A16（仍然够用）", "A18（更新一代）"],
+          "相机能力": ["4800 万主摄，够用", "4800 万主摄，略优化"],
+          "存储版本": ["你现有的", "256GB"],
+          "电池容量/续航": ["原厂电池，视使用情况", "约 3561 mAh｜新电池更满"],
+          "适合人群": ["没有明确痛点，控制预算优先", "有明确升级理由，愿意花钱"],
+        },
+      },
+      {
+        id: "ip-15-premium",
+        match: { tilt: ["愿意多花一点，换更完整体验", "预算基本不设限，想一步到位"], prev: "iPhone 15 系列（2023年款）", reason: "*" },
+        primary: { name: "iPhone 16 Pro Max 256GB", price: "RMB 9999 起",
+          bullets: ["从 15 直接升到顶配，一步到位减少后悔", "4685 mAh 最强续航，彻底解决 15 系列的续航短板", "最大屏 + 最强相机 + 最新芯片，3-4 年不后悔"] },
+        alt: { name: "iPhone 16 Pro 256GB", price: "RMB 8999 起",
+          diff: "小屏版，省 1000 元，相机相同但屏幕和续航略逊" },
+        tag: "15系列跨越式升级",
+        insight: "既然你用的是 15 系列，愿意多花的话，直接 Pro Max 比 Pro 更值——续航是最大的升级感知点。",
+        accessories: [
+          { name: "钛金属保护壳", why: "旗舰机配上质感的壳" },
+          { name: "AirPods Pro 2", why: "最顶配的苹果组合" },
+        ],
+        compare: {
+          "价格": ["RMB 9999 起", "RMB 8999 起"],
+          "屏幕尺寸": ["6.9 寸 ProMotion 大屏", "6.3 寸 ProMotion"],
+          "芯片": ["A18 Pro", "A18 Pro"],
+          "相机能力": ["Pro 三摄 + 5 倍长焦", "同款相机"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 4685 mAh｜最强续航", "约 3582 mAh｜更好但不如 Max"],
+          "适合人群": ["大屏续航一步到位", "更在意便携性与手感"],
+        },
+      },
+
+      // ─── 通用兜底（预算状态为主要决策轴）────────────────────────
+      {
+        id: "ip-fallback-nolimit",
+        match: { tilt: "预算基本不设限，想一步到位", prev: "*", reason: "*" },
+        primary: { name: "iPhone 16 Pro Max 256GB", price: "RMB 9999 起",
+          bullets: ["旗舰全系最强续航 4685 mAh", "Pro 级三摄 + 5 倍长焦 + Camera Control", "最大屏幕，沉浸感最强"] },
+        alt: { name: "iPhone 16 Pro 256GB", price: "RMB 8999 起",
+          diff: "轻巧一些，省 1000 元，相机系统完全相同" },
+        tag: "一步到位",
+        insight: "预算不设限，16 Pro Max 是目前最完整的 iPhone 体验——续航、屏幕、相机都是全系最强。",
+        accessories: [
+          { name: "钛金属保护壳", why: "旗舰配件，手感和颜值兼顾" },
+          { name: "AirPods Pro 2", why: "旗舰手机搭配旗舰耳机，体验最完整" },
+        ],
+        compare: {
+          "价格": ["RMB 9999 起", "RMB 8999 起"],
+          "屏幕尺寸": ["6.9 寸 ProMotion 大屏", "6.3 寸 ProMotion"],
+          "芯片": ["A18 Pro", "A18 Pro"],
+          "相机能力": ["Pro 三摄 + 5 倍长焦", "同款相机"],
+          "存储版本": ["256GB", "256GB"],
+          "电池容量/续航": ["约 4685 mAh｜全系最强", "约 3582 mAh｜优于标准版"],
+          "适合人群": ["一步到位、不在乎价格", "同等性能但更轻便"],
+        },
+      },
+      {
+        id: "ip-fallback-balanced",
+        match: { tilt: "*", prev: "*", reason: "*" },
+        primary: { name: "iPhone 16 256GB", price: "RMB 6499 起",
+          bullets: ["最均衡的 iPhone 选择，适合绝大多数用户", "256GB 容量长期使用不焦虑", "A18 芯片保证多年流畅体验"] },
+        alt: { name: "iPhone 16 128GB", price: "RMB 5999 起",
+          diff: "省 500 元，容量更克制，够用就行" },
+        tag: "均衡首选",
+        insight: "综合考虑下来，iPhone 16 256GB 是最通用的推荐——价格适中，容量充裕，体验均衡。",
+        accessories: [
+          { name: "MagSafe 壳", why: "保护新机，同时享受磁吸配件" },
+          { name: "MagSafe 充电器", why: "桌面充电更方便" },
+        ],
+        compare: {
+          "价格": ["RMB 6499 起", "RMB 5999 起"],
+          "屏幕尺寸": ["6.1 寸", "6.1 寸"],
+          "芯片": ["A18", "A18"],
+          "相机能力": ["4800 万主摄", "4800 万主摄"],
+          "存储版本": ["256GB（更耐用）", "128GB（更省钱）"],
+          "电池容量/续航": ["约 3561 mAh", "约 3561 mAh"],
+          "适合人群": ["想买得更踏实", "够用就好，省点钱"],
+        },
+      },
+    ],
+  };
+
+  // ══════════════════════════════════════════════════════════
+  // MacBook 分支 — V3 逻辑保持，小优化
+  // ══════════════════════════════════════════════════════════
+  const MACBOOK = {
+    label: "MacBook",
+    desc: "找一台适合你工作与生活的笔记本",
+    q3: {
+      title: "你主要拿它做什么？",
+      hint: "选你最常发生的场景，我们会结合预算倾向推荐更合适的机型路线。",
+      options: [
+        { label: "文档办公 / 上课", desc: "Word、Excel、PPT、网课是主力使用场景。" },
+        { label: "写代码 / 开发",   desc: "IDE、终端、本地服务是常驻场景。" },
+        { label: "视频剪辑 / 设计", desc: "Premiere、Final Cut、Figma 等高性能需求。" },
+        { label: "日常全能",        desc: "什么都做，没有特别重的单一需求。" },
+      ],
+    },
+    q4: {
+      title: "你更看重哪个？",
+      hint: "这会影响尺寸、性能与预算的取舍方向。",
+      options: [
+        { label: "越轻越好，随时带走", desc: "背包里装着走，轻便第一。" },
+        { label: "大屏更舒服",         desc: "主要在桌子上用，分屏效率更重要。" },
+        { label: "性能更强",           desc: "不想被性能瓶颈拖慢工作。" },
+        { label: "预算更友好",         desc: "在满足需求的前提下尽量省钱。" },
+      ],
+    },
+    compareFields: ["价格", "屏幕尺寸", "芯片", "续航", "散热定位", "适合人群"],
+    rules: [
+      {
+        id: "mb-budget",
+        match: { tilt: "控制预算，够用就好", usage: "*", pref: "*" },
+        primary: { name: "MacBook Air 13 寸 M2", price: "RMB 7999 起",
+          bullets: ["基础场景完全覆盖，不为用不到的性能多花钱", "轻薄便携 1.24kg，通勤和课堂更轻松", "续航约 18 小时，整天不插电"] },
+        alt: { name: "MacBook Air 13 寸 M3", price: "RMB 8999 起",
+          diff: "多花 1000 元，M3 多任务更从容，使用年限更长" },
+        tag: "控制预算",
+        insight: null,
+        accessories: [
+          { name: "USB-C Hub", why: "补足接口，课堂/会议连接更顺畅" },
+          { name: "保护套", why: "高频携带更安心，减少磕碰" },
+        ],
+        compare: {
+          "价格": ["RMB 7999 起", "RMB 8999 起"],
+          "屏幕尺寸": ["13 寸", "13 寸"],
+          "芯片": ["M2（仍非常够用）", "M3（更新一代）"],
+          "续航": ["约 18 小时视频播放", "约 18 小时视频播放"],
+          "散热定位": ["无风扇，安静省心", "无风扇，安静省心"],
+          "适合人群": ["明确控制预算，够用即可", "想更长线使用与多任务更稳"],
+        },
+      },
+      {
+        id: "mb-balanced",
+        match: { tilt: "预算中间档，想买得均衡", usage: "*", pref: "*" },
+        primary: { name: "MacBook Air 13 寸 M3", price: "RMB 8999 起",
+          bullets: ["便携、性能、价格最平衡", "续航 18 小时，通勤和移动办公的最优选", "学习/娱乐/办公都流畅"] },
+        alt: { name: "MacBook Air 15 寸 M3", price: "RMB 10499 起",
+          diff: "多花 1500 元，15 寸大屏分屏更舒服，续航也更长" },
+        tag: "均衡稳妥",
+        insight: null,
+        accessories: [
+          { name: "USB-C Hub", why: "补足接口，桌面连接更完整" },
+          { name: "MagSafe 充电器", why: "补能方便，桌面更整洁" },
+        ],
+        compare: {
+          "价格": ["RMB 8999 起", "RMB 10499 起"],
+          "屏幕尺寸": ["13 寸", "15 寸"],
+          "芯片": ["M3", "M3"],
+          "续航": ["约 18 小时，通勤一天轻松", "约 18 小时，大屏也能全天"],
+          "散热定位": ["无风扇，安静省心", "无风扇，安静省心"],
+          "适合人群": ["经常移动、想要均衡", "在意大屏，多任务更舒服"],
+        },
+      },
+      {
+        id: "mb-balanced-dev",
+        match: { tilt: "预算中间档，想买得均衡", usage: "写代码 / 开发", pref: "*" },
+        primary: { name: "MacBook Air 15 寸 M3", price: "RMB 10499 起",
+          bullets: ["大屏分屏写代码更舒适，减少窗口切换", "M3 性能应对大多数开发场景足够", "15 寸展示终端和编辑器侧边栏更宽裕"] },
+        alt: { name: "MacBook Pro 14 寸 M4", price: "RMB 13999 起",
+          diff: "多花 3500 元可以获得主动散热和更强持续性能，适合跑本地服务或编译任务多的开发者" },
+        tag: "开发均衡款",
+        insight: null,
+        accessories: [
+          { name: "USB-C Hub", why: "开发者接口需求多，Hub 必备" },
+          { name: "外接显示器推荐", why: "主力开发建议外接显示器，效率提升明显" },
+        ],
+        compare: {
+          "价格": ["RMB 10499 起", "RMB 13999 起"],
+          "屏幕尺寸": ["15 寸", "14 寸"],
+          "芯片": ["M3（中度开发够用）", "M4（更强持续性能）"],
+          "续航": ["约 18 小时视频播放", "约 24 小时视频播放"],
+          "散热定位": ["无风扇，轻度开发安静", "主动散热，长时间编译更稳"],
+          "适合人群": ["日常开发，偶尔编译", "高强度开发，经常跑本地服务"],
+        },
+      },
+      {
+        id: "mb-premium",
+        match: { tilt: "愿意多花一点，换更完整体验", usage: "*", pref: "*" },
+        primary: { name: "MacBook Pro 14 寸 M4", price: "RMB 13999 起",
+          bullets: ["性能、屏幕与持续输出更完整", "更适合长时间多任务与更重的软件使用", "作为长期主力机更踏实"] },
+        alt: { name: "MacBook Air 15 寸 M3", price: "RMB 10499 起",
+          diff: "如果使用强度不高，Air 15 寸更轻便也更省预算" },
+        tag: "更完整体验",
+        insight: null,
+        accessories: [
+          { name: "雷雳 4 扩展坞", why: "桌面连接一体化，外设切换省心" },
+          { name: "外接显示器", why: "多窗口更高效，适合长期桌面工作" },
+        ],
+        compare: {
+          "价格": ["RMB 13999 起", "RMB 10499 起"],
+          "屏幕尺寸": ["14 寸 Liquid Retina XDR", "15 寸 Liquid Retina"],
+          "芯片": ["M4", "M3"],
+          "续航": ["约 24 小时视频播放", "约 18 小时视频播放"],
+          "散热定位": ["主动散热，持续输出更稳", "无风扇，安静但更偏轻负载"],
+          "适合人群": ["愿意多花一点换更完整体验", "更看重大屏与轻便的人"],
+        },
+      },
+      {
+        id: "mb-nolimit",
+        match: { tilt: "预算基本不设限，想一步到位", usage: "*", pref: "*" },
+        primary: { name: "MacBook Pro 16 寸 M4 Pro", price: "RMB 19999 起",
+          bullets: ["更适合长期主力机与重度需求", "更大屏适合多窗口与创作", "持续输出最稳，长时间工作最从容"] },
+        alt: { name: "MacBook Pro 14 寸 M4 Pro", price: "RMB 16999 起",
+          diff: "性能相同但更轻便，省 3000 元，适合需要高性能但更看重便携的人" },
+        tag: "一步到位",
+        insight: null,
+        accessories: [
+          { name: "雷雳 4 扩展坞", why: "桌面连接一体化" },
+          { name: "外接显示器", why: "多窗口效率最高" },
+        ],
+        compare: {
+          "价格": ["RMB 19999 起", "RMB 16999 起"],
+          "屏幕尺寸": ["16 寸", "14 寸"],
+          "芯片": ["M4 Pro", "M4 Pro"],
+          "续航": ["约 24 小时视频播放", "约 24 小时视频播放"],
+          "散热定位": ["更强散热，持续最稳", "主动散热，持续输出稳"],
+          "适合人群": ["预算不设限，追求长期主力", "高性能 + 便携平衡"],
+        },
+      },
+    ],
+  };
+
+  // ══════════════════════════════════════════════════════════
+  // AirPods 分支 — V4 修复 Bug：降噪优先于预算
+  // ══════════════════════════════════════════════════════════
+  const AIRPODS = {
+    label: "AirPods",
+    desc: "挑一副更适合你使用场景的耳机",
+    q3: {
+      title: "你主要在哪种场景使用？",
+      hint: "场景决定我们更优先考虑降噪、形态，还是多设备切换。",
+      options: [
+        { label: "通勤 / 降噪优先",     desc: "地铁、公交、嘈杂环境，需要隔绝噪音。" },
+        { label: "日常轻便佩戴",         desc: "随时戴上随时摘，不想有异物感。" },
+        { label: "办公 / 多设备切换",   desc: "手机和电脑经常换着用，切换要顺滑。" },
+        { label: "运动场景",             desc: "跑步、健身时佩戴，需要稳固不掉落。" },
+      ],
+    },
+    q4: {
+      title: "你更在意什么？",
+      hint: "这会决定我们在同预算路线里选更轻便还是更完整的体验。",
+      options: [
+        { label: "性价比优先",   desc: "功能够用，花最少的钱。" },
+        { label: "轻便舒适",     desc: "佩戴感最重要，越轻越好。" },
+        { label: "音质体验",     desc: "听感细腻，声场丰富更重要。" },
+        { label: "降噪和完整体验", desc: "要最强的降噪和最完整的功能。" },
+      ],
+    },
+    compareFields: ["价格", "佩戴形式", "降噪能力", "续航（单次/含充电盒）", "连接场景", "音质定位", "适合人群"],
+
+    // V4 关键修复：降噪相关规则优先级最高，排在最前面
+    rules: [
+      // ─── [V4 BUG FIX] 控制预算 + 通勤降噪 → 必须推降噪版 ───────────
+      // 用户4的原始 bug：控制预算 + 降噪场景 → 错误推荐了无降噪的标准版
+      {
+        id: "ap-budget-commute-nc",
+        match: { tilt: "控制预算，够用就好", scene: "通勤 / 降噪优先", pref: "*" },
+        primary: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          bullets: ["你明确需要降噪，这是最省钱的降噪选择", "开放式设计比入耳更自然，长戴不难受", "降噪效果满足通勤场景"] },
+        alt: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          diff: "多花 500 元，降噪更强，音质更好，入耳隔音也更彻底" },
+        tag: "控制预算降噪版",
+        insight: null,
+        accessories: [
+          { name: "硅胶保护套", why: "通勤包里放着，保护充电盒" },
+          { name: "无线充电底座", why: "桌面随手一放就充，不用找线" },
+        ],
+        compare: {
+          "价格": ["RMB 1399 起", "RMB 1899 起"],
+          "佩戴形式": ["开放式（更自然）", "入耳式（隔音更彻底）"],
+          "降噪能力": ["有，轻量级降噪", "有，更强更完整"],
+          "续航（单次/含充电盒）": ["5h / 30h", "6h / 30h"],
+          "连接场景": ["通勤日常够用", "通勤办公都更好"],
+          "音质定位": ["自然耐听", "均衡 + 空间音频"],
+          "适合人群": ["预算有限但需要降噪", "愿意多花 500 换更强降噪"],
+        },
+      },
+      // ─── 控制预算 + 明确降噪偏好 → 也推降噪版 ─────────────────────
+      {
+        id: "ap-budget-nc-pref",
+        match: { tilt: "控制预算，够用就好", scene: "*", pref: "降噪和完整体验" },
+        primary: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          bullets: ["你最在意降噪，这是最经济的降噪入门", "开放式比入耳更舒适，日常戴更轻松", "满足降噪需求不多花冤枉钱"] },
+        alt: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          diff: "多花 500 元，降噪质量有明显提升" },
+        tag: "降噪预算款",
+        insight: null,
+        accessories: [
+          { name: "硅胶保护套", why: "日常收纳更安心" },
+        ],
+        compare: {
+          "价格": ["RMB 1399 起", "RMB 1899 起"],
+          "佩戴形式": ["开放式", "入耳式"],
+          "降噪能力": ["有，轻量级", "有，更强"],
+          "续航（单次/含充电盒）": ["5h / 30h", "6h / 30h"],
+          "连接场景": ["日常通勤", "通勤办公多场景"],
+          "音质定位": ["自然耐听", "均衡 + 空间音频"],
+          "适合人群": ["降噪优先，预算有限", "降噪优先，愿意多花 500"],
+        },
+      },
+      // ─── 控制预算 + 日常轻便（真正不需要降噪）→ 推标准版 ───────────
+      {
+        id: "ap-budget-casual",
+        match: { tilt: "控制预算，够用就好", scene: ["日常轻便佩戴", "运动场景"], pref: "*" },
+        primary: { name: "AirPods 4 标准版", price: "RMB 999 起",
+          bullets: ["日常轻便佩戴最经济实惠的选择", "开放式设计，长戴不难受，自然感强", "不需要降噪，不为多余功能付费"] },
+        alt: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          diff: "如果你偶尔也有通勤降噪需求，多花 400 元升级到降噪版" },
+        tag: "日常轻便首选",
+        insight: null,
+        accessories: [
+          { name: "硅胶保护套", why: "随身携带更安心，防划蹭" },
+          { name: "无线充电底座", why: "桌面补能更方便" },
+        ],
+        compare: {
+          "价格": ["RMB 999 起", "RMB 1399 起"],
+          "佩戴形式": ["开放式", "开放式"],
+          "降噪能力": ["无", "有（轻量）"],
+          "续航（单次/含充电盒）": ["5h / 30h", "5h / 30h"],
+          "连接场景": ["日常轻便", "通勤 + 日常"],
+          "音质定位": ["自然耐听", "自然 + 一点降噪"],
+          "适合人群": ["不需要降噪，控制预算", "偶尔通勤，轻度降噪需求"],
+        },
+      },
+      // ─── 均衡 + 通勤降噪 ─────────────────────────────────────────
+      {
+        id: "ap-balanced-commute",
+        match: { tilt: "预算中间档，想买得均衡", scene: "通勤 / 降噪优先", pref: "*" },
+        primary: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          bullets: ["通勤降噪场景下，Pro 2 是最均衡的选择", "自适应通透模式，降噪时也能感知环境声", "续航 6h+30h，通勤全程更从容"] },
+        alt: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          diff: "省 500 元，降噪效果稍弱，但对轻度通勤需求也够用" },
+        tag: "通勤降噪均衡款",
+        insight: null,
+        accessories: [
+          { name: "AirPods 保护壳", why: "通勤包里随手进出，保护壳必备" },
+        ],
+        compare: {
+          "价格": ["RMB 1899 起", "RMB 1399 起"],
+          "佩戴形式": ["入耳式（隔音彻底）", "开放式（更自然）"],
+          "降噪能力": ["强，自适应通透模式", "有，轻量级"],
+          "续航（单次/含充电盒）": ["6h / 30h", "5h / 30h"],
+          "连接场景": ["通勤/办公都优秀", "通勤够用"],
+          "音质定位": ["均衡 + 空间音频", "自然耐听"],
+          "适合人群": ["通勤为主，想要更完整体验", "通勤轻度需求，省点钱"],
+        },
+      },
+      // ─── 均衡 + 日常/运动 ─────────────────────────────────────────
+      {
+        id: "ap-balanced-casual",
+        match: { tilt: "预算中间档，想买得均衡", scene: ["日常轻便佩戴", "运动场景", "办公 / 多设备切换"], pref: "*" },
+        primary: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          bullets: ["轻便与功能最平衡，适合大多数用户", "开放式佩戴，日常戴着更自然", "办公和日常都能补足一点降噪"] },
+        alt: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          diff: "多花 500 元，降噪和音质更完整，入耳隔音也更好" },
+        tag: "均衡日常款",
+        insight: null,
+        accessories: [
+          { name: "保护壳", why: "长期携带更安心，减少刮蹭" },
+          { name: "无线充电底座", why: "桌面随手一放就充" },
+        ],
+        compare: {
+          "价格": ["RMB 1399 起", "RMB 1899 起"],
+          "佩戴形式": ["开放式", "入耳式"],
+          "降噪能力": ["有（轻量）", "强"],
+          "续航（单次/含充电盒）": ["5h / 30h", "6h / 30h"],
+          "连接场景": ["日常/轻度通勤", "通勤/办公/日常全能"],
+          "音质定位": ["自然耐听", "均衡 + 空间音频"],
+          "适合人群": ["轻便与功能均衡", "愿意多花换更完整体验"],
+        },
+      },
+      // ─── 愿意多花 ─────────────────────────────────────────────────
+      {
+        id: "ap-premium",
+        match: { tilt: "愿意多花一点，换更完整体验", scene: "*", pref: "*" },
+        primary: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          bullets: ["降噪、通透、音质体验最完整", "通勤和办公都更省心", "作为长期主力耳机更踏实"] },
+        alt: { name: "AirPods 4 主动降噪版", price: "RMB 1399 起",
+          diff: "更喜欢开放式佩戴的话，AirPods 4 降噪版是很好的降级选择" },
+        tag: "更完整体验",
+        insight: null,
+        accessories: [
+          { name: "AirPods 保护壳", why: "日常收纳与携带更安心" },
+          { name: "无线充电底座", why: "桌面补能更方便" },
+        ],
+        compare: {
+          "价格": ["RMB 1899 起", "RMB 1399 起"],
+          "佩戴形式": ["入耳式", "开放式"],
+          "降噪能力": ["强，更完整", "有（轻量）"],
+          "续航（单次/含充电盒）": ["6h / 30h", "5h / 30h"],
+          "连接场景": ["通勤/办公/日常全能", "日常/轻度通勤"],
+          "音质定位": ["均衡 + 空间音频", "自然耐听"],
+          "适合人群": ["愿意多花换更完整体验", "更喜欢开放式的人"],
+        },
+      },
+      // ─── 不设限 + 音质/沉浸 → AirPods Max ───────────────────────
+      {
+        id: "ap-nolimit-max",
+        match: { tilt: "预算基本不设限，想一步到位", scene: ["办公 / 多设备切换", "通勤 / 降噪优先"], pref: ["音质体验", "降噪和完整体验"] },
+        primary: { name: "AirPods Max", price: "RMB 3999 起",
+          bullets: ["头戴式更沉浸，适合长时间听音", "空间感与细节更完整，听感更厚实", "适合把听音当作高频需求的人"] },
+        alt: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          diff: "如果你也需要随身通勤，Pro 2 会更全能轻便" },
+        tag: "音质一步到位",
+        insight: null,
+        accessories: [
+          { name: "音频线（AirPods Max）", why: "固定场景连接更稳定，更省电" },
+          { name: "保护壳", why: "便携收纳更安心" },
+        ],
+        compare: {
+          "价格": ["RMB 3999 起", "RMB 1899 起"],
+          "佩戴形式": ["头戴式（更沉浸）", "入耳式（更便携）"],
+          "降噪能力": ["强（更沉浸包裹）", "强"],
+          "续航（单次/含充电盒）": ["20h / 无充电盒", "6h / 30h"],
+          "连接场景": ["更适合固定桌面长听", "通勤/日常全能"],
+          "音质定位": ["更沉浸更厚实", "均衡耐听"],
+          "适合人群": ["预算充足，音质/沉浸感优先", "随身全能一副解决"],
+        },
+      },
+      // ─── 不设限（通用）→ Pro 2 ───────────────────────────────────
+      {
+        id: "ap-nolimit-pro",
+        match: { tilt: "预算基本不设限，想一步到位", scene: "*", pref: "*" },
+        primary: { name: "AirPods Pro 2（USB-C）", price: "RMB 1899 起",
+          bullets: ["降噪、通透、音质体验最完整的随身耳机", "通勤与办公都更省心", "作为长期主力最稳妥"] },
+        alt: { name: "AirPods Max", price: "RMB 3999 起",
+          diff: "如果你主要在桌面长时间听音，且不需要随身携带，Max 更沉浸" },
+        tag: "一步到位",
+        insight: null,
+        accessories: [
+          { name: "AirPods 保护壳", why: "日常收纳携带更安心" },
+          { name: "无线充电底座", why: "桌面补能更方便" },
+        ],
+        compare: {
+          "价格": ["RMB 1899 起", "RMB 3999 起"],
+          "佩戴形式": ["入耳式（便携）", "头戴式（沉浸）"],
+          "降噪能力": ["强", "强（更沉浸）"],
+          "续航（单次/含充电盒）": ["6h / 30h", "20h / 无充电盒"],
+          "连接场景": ["通勤/办公/日常全能", "更适合桌面固定场景"],
+          "音质定位": ["均衡 + 空间音频", "更沉浸更厚实"],
+          "适合人群": ["随身全能一副解决", "预算充足、追求沉浸感"],
+        },
+      },
+    ],
+  };
+
+  const PRODUCTS = {
+    iphone:  IPHONE,
+    macbook: MACBOOK,
+    airpods: AIRPODS,
+  };
+
+  // ══════════════════════════════════════════════════════════
+  // 推荐匹配引擎
+  // ══════════════════════════════════════════════════════════
+  function matchVal(ruleVal, actual) {
+    if (ruleVal === "*" || ruleVal === undefined || ruleVal === null) return { match: true, score: 0 };
+    if (Array.isArray(ruleVal)) {
+      return ruleVal.includes(actual) ? { match: true, score: 2 } : { match: false, score: 0 };
+    }
+    return ruleVal === actual ? { match: true, score: 4 } : { match: false, score: 0 };
+  }
+
+  function matchRule(rule, branch, tilt, q3val, q4val) {
+    const m = rule.match || {};
+    let totalScore = 0;
+    let ok = true;
+
+    // tilt
+    const t = matchVal(m.tilt, tilt);
+    if (!t.match) { ok = false; }
+    totalScore += t.score * 2; // tilt 权重加倍
+
+    if (branch === "iphone") {
+      const p = matchVal(m.prev, q3val);
+      const r = matchVal(m.reason, q4val);
+      if (!p.match || !r.match) ok = false;
+      totalScore += p.score + r.score;
+    } else if (branch === "macbook") {
+      const u = matchVal(m.usage, q3val);
+      const pr = matchVal(m.pref, q4val);
+      if (!u.match || !pr.match) ok = false;
+      totalScore += u.score + pr.score;
+    } else {
+      const s = matchVal(m.scene, q3val);
+      const pr = matchVal(m.pref, q4val);
+      if (!s.match || !pr.match) ok = false;
+      totalScore += s.score + pr.score;
+    }
+
+    return { ok, score: totalScore };
+  }
+
+  function matchRecommendation() {
+    const branch = state.branch;
+    const b = PRODUCTS[branch];
+    const tilt = state.answers.q2;
+    const q3 = state.answers.q3;
+    const q4 = state.answers.q4;
+
+    let best = null;
+    let bestScore = -1;
+
+    for (const rule of b.rules) {
+      const { ok, score } = matchRule(rule, branch, tilt, q3, q4);
+      if (ok && score > bestScore) {
+        bestScore = score;
+        best = rule;
+      }
+    }
+
+    const picked = best || b.rules[b.rules.length - 1];
+    const why = buildWhy(branch, tilt, q3, q4, picked);
+
+    return { branch, tilt, q3, q4, primary: picked.primary, alt: picked.alt, tag: picked.tag,
+      insight: picked.insight || null,
+      accessories: picked.accessories || [],
+      compareFields: b.compareFields, compare: picked.compare || {}, why };
+  }
+
+  function buildWhy(branch, tilt, q3, q4, rule) {
+    const budgetLine = {
+      "控制预算，够用就好":         "因为你选择了「控制预算，够用就好」，我们优先推荐性价比更高的路线。",
+      "预算中间档，想买得均衡":     "因为你想「预算均衡」，我们选了体验与价格最平衡的方案。",
+      "愿意多花一点，换更完整体验": "因为你愿意多花一点，我们把体验关键点补齐了，减少使用中的妥协感。",
+      "预算基本不设限，想一步到位": "因为你想「一步到位」，我们选了最完整的路线，减少后悔成本。",
+    }[tilt] || "基于你的整体选择，";
+
+    let detail = "";
+    if (branch === "iphone") {
+      if (q3) detail += `你目前用的是${q3}`;
+      if (q4) detail += `，换机主要原因是「${q4}」`;
+    } else if (branch === "macbook") {
+      if (q3) detail += `你主要用于${q3}`;
+      if (q4) detail += `，更看重「${q4}」`;
+    } else {
+      if (q3) detail += `你主要在「${q3}」使用`;
+      if (q4) detail += `，最在意「${q4}」`;
+    }
+
+    return `${budgetLine}${detail ? detail + `，因此 ${rule.primary.name} 更贴合你当下的需求。` : `因此 ${rule.primary.name} 是最适合你的选择。`}`;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // UI 渲染
+  // ══════════════════════════════════════════════════════════
+  const STEPS = {
+    welcome: { progress: 0,   chip: "准备开始" },
+    q1:      { progress: 20,  chip: "第 1/4 步" },
+    q2:      { progress: 45,  chip: "第 2/4 步" },
+    q3:      { progress: 70,  chip: "第 3/4 步" },
+    q4:      { progress: 90,  chip: "第 4/4 步" },
+    result:  { progress: 100, chip: "推荐已生成" },
+  };
+
+  function esc(s) {
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+  }
+
+  function cardHTML(title, desc, metaLabel) {
+    return `<div class="card" role="button" tabindex="0" aria-label="${esc(title)}">
+      <div class="cardTitle">${esc(title)}</div>
+      <p class="cardDesc">${esc(desc || "")}</p>
+      <div class="cardMeta"><span class="pill">${esc(metaLabel || "选择")}</span><span class="arrow" aria-hidden="true">→</span></div>
+    </div>`;
+  }
+
+  function bindCards(container, onPick) {
+    container.onclick = e => {
+      const c = e.target.closest(".card");
+      if (!c || !container.contains(c)) return;
+      onPick([...container.querySelectorAll(".card")].indexOf(c));
+    };
+    container.onkeydown = e => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      const c = e.target.closest(".card");
+      if (!c || !container.contains(c)) return;
+      e.preventDefault();
+      onPick([...container.querySelectorAll(".card")].indexOf(c));
+    };
+  }
+
+  function showScreen(key, isResult = false) {
+    state.step = key;
+    const s = STEPS[key] || STEPS.welcome;
+    el.progressBar.style.width = s.progress + "%";
+    el.chipStatus.textContent = s.chip;
+    Object.entries(el.screens).forEach(([k, node]) => {
+      if (!node) return;
+      if (k === key) { node.classList.add("active"); }
+      else { node.classList.remove("visible","active"); }
+    });
+    const node = el.screens[key];
+    if (!node) return;
+    if (isResult) node.classList.add("result-animate");
+    requestAnimationFrame(() => {
+      node.classList.add("visible");
+      if (isResult) requestAnimationFrame(() => node.classList.remove("result-animate"));
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderQ1() {
+    el.q1Grid.innerHTML = [
+      { key: "iphone",  p: IPHONE  },
+      { key: "macbook", p: MACBOOK },
+      { key: "airpods", p: AIRPODS },
+    ].map(x => cardHTML(x.p.label, x.p.desc, "选择品类")).join("");
+    bindCards(el.q1Grid, idx => {
+      const keys = ["iphone","macbook","airpods"];
+      state.branch = keys[idx];
+      state.answers = { q1: PRODUCTS[keys[idx]].label, q2: null, q3: null, q4: null };
+      state.compareOpen = false;
+      el.compareWrap.classList.remove("open");
+      renderQ2();
+      showScreen("q2");
+    });
+  }
+
+  function renderQ2() {
+    el.q2Title.textContent = BUDGET_Q.title;
+    el.q2Hint.textContent = BUDGET_Q.hint;
+    el.q2Grid.innerHTML = BUDGET_Q.options.map(o => cardHTML(o.label, o.desc, "单选")).join("");
+    bindCards(el.q2Grid, idx => {
+      state.answers.q2 = BUDGET_Q.options[idx].label;
+      renderQ3();
+      showScreen("q3");
+    });
+  }
+
+  function renderQ3() {
+    const q = PRODUCTS[state.branch].q3;
+    el.q3Title.textContent = q.title;
+    el.q3Hint.textContent = q.hint;
+    el.q3Grid.innerHTML = q.options.map(o => cardHTML(o.label, o.desc, "单选")).join("");
+    bindCards(el.q3Grid, idx => {
+      state.answers.q3 = q.options[idx].label;
+      renderQ4();
+      showScreen("q4");
+    });
+  }
+
+  function renderQ4() {
+    const q = PRODUCTS[state.branch].q4;
+    el.q4Title.textContent = q.title;
+    el.q4Hint.textContent = q.hint;
+    el.q4Grid.innerHTML = q.options.map(o => cardHTML(o.label, o.desc, "单选")).join("");
+    bindCards(el.q4Grid, idx => {
+      state.answers.q4 = q.options[idx].label;
+      const matched = matchRecommendation();
+      state.matched = matched;
+      renderResult(matched);
+      showScreen("result", true);
+    });
+  }
+
+  function renderResult(m) {
+    el.resultSub.textContent = `基于你的选择（${m.tilt}），我们为你整理了最适合的主推、备选与搭配建议。`;
+    el.reasonTag.textContent = m.tag ? `推荐理由：${m.tag}` : "推荐理由";
+    el.primaryName.textContent = m.primary.name;
+    el.primaryPrice.textContent = m.primary.price;
+    el.primaryBullets.innerHTML = (m.primary.bullets || []).map(x => `<li>${esc(x)}</li>`).join("");
+    el.primaryWhy.textContent = m.why;
+
+    // 升级洞察（仅 iPhone 分支，且 insight 存在时显示）
+    if (m.insight && m.branch === "iphone") {
+      el.insightWrap.style.display = "";
+      el.insightText.innerHTML = `<strong>💡 升级洞察：</strong>${esc(m.insight)}`;
+    } else {
+      el.insightWrap.style.display = "none";
+    }
+
+    el.altName.textContent = m.alt.name;
+    el.altPrice.textContent = m.alt.price;
+    el.altDiff.textContent = m.alt.diff;
+
+    el.accessoryGrid.innerHTML = (m.accessories || []).slice(0, 3).map(a =>
+      `<div class="card mini"><p class="miniTitle">${esc(a.name)}</p><p class="miniDesc">${esc(a.why)}</p></div>`
+    ).join("");
+
+    // 对比表
+    if (el.thPrimary) el.thPrimary.textContent = m.primary.name;
+    if (el.thAlt) el.thAlt.textContent = m.alt.name;
+    el.compareBody.innerHTML = (m.compareFields || []).map(f => {
+      const row = m.compare?.[f] || ["—","—"];
+      return `<tr><td><strong>${esc(f)}</strong></td><td>${esc(row[0]??'—')}</td><td>${esc(row[1]??'—')}</td></tr>`;
+    }).join("");
+
+    state.compareOpen = false;
+    el.compareWrap.classList.remove("open");
+    el.btnCompare.textContent = "对比主推 vs 备选";
+  }
+
+  function buildSaveSummary(m) {
+    return `【Help Me Choose 推荐摘要】\n\n主推：${m.primary.name}（${m.primary.price}）\n备选：${m.alt.name}（${m.alt.price}）\n\n推荐理由：${m.why}\n\n搭配推荐：${(m.accessories||[]).map(x=>x.name).join('、')}\n\n--- 在 Apple Store 查看主推款 ---`;
+  }
+
+  // ── 事件绑定 ──
+  el.btnStart.addEventListener("click", () => { renderQ1(); showScreen("q1"); });
+
+  el.btnStore.addEventListener("click", () => {
+    const name = state.matched?.primary?.name || "";
+    const urls = {
+      "iPhone": "https://www.apple.com.cn/shop/buy-iphone",
+      "MacBook": "https://www.apple.com.cn/shop/buy-mac",
+      "AirPods": "https://www.apple.com.cn/shop/buy-airpods",
+    };
+    const url = Object.entries(urls).find(([k]) => name.toLowerCase().includes(k.toLowerCase()))?.[1]
+      || "https://www.apple.com.cn/store";
+    window.open(url, "_blank");
+  });
+
+  el.btnCompare.addEventListener("click", () => {
+    state.compareOpen = !state.compareOpen;
+    el.compareWrap.classList.toggle("open", state.compareOpen);
+    el.btnCompare.textContent = state.compareOpen ? "收起对比" : "对比主推 vs 备选";
+  });
+
+  el.btnSave.addEventListener("click", () => {
+    if (!state.matched) return;
+    el.saveText.value = buildSaveSummary(state.matched);
+    el.modalOverlay.classList.add("show");
+    setTimeout(() => { el.saveText.focus(); el.saveText.select(); }, 50);
+  });
+
+  el.linkRestart.addEventListener("click", e => {
+    e.preventDefault();
+    state.step = "welcome"; state.branch = null;
+    state.answers = { q1:null, q2:null, q3:null, q4:null };
+    state.compareOpen = false; state.matched = null;
+    el.compareWrap.classList.remove("open");
+    showScreen("welcome");
+  });
+
+  el.btnCloseModal.addEventListener("click", () => el.modalOverlay.classList.remove("show"));
+  el.modalOverlay.addEventListener("click", e => { if (e.target === el.modalOverlay) el.modalOverlay.classList.remove("show"); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") el.modalOverlay.classList.remove("show"); });
+
+  el.btnSelectAll.addEventListener("click", () => { el.saveText.focus(); el.saveText.select(); });
+  el.btnCopy.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(el.saveText.value); }
+    catch { el.saveText.focus(); el.saveText.select(); document.execCommand("copy"); }
+    el.btnCopy.textContent = "已复制 ✓";
+    setTimeout(() => el.btnCopy.textContent = "复制摘要", 1200);
+  });
+
+  // Init
+  showScreen("welcome");
+})();
+</script>
+</body>
+</html>
