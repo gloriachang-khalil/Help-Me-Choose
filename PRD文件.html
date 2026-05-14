@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help Me Choose — PRD Portfolio Executive Version</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: #efefeb;
+      color: #11131a;
+    }
+    :root {
+      --ink: #11131a;
+      --ink-2: #353946;
+      --ink-3: #757b88;
+      --ink-4: #a5acb8;
+      --surface: #ffffff;
+      --surface-2: #fafbfc;
+      --rule: #e5e7ec;
+      --blue: #0066cc;
+      --blue-soft: #eaf2fb;
+      --amber-soft: #fff8ed;
+      --green-soft: #eef8f1;
+      --shadow: 0 20px 60px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .doc {
+      width: 100%;
+      max-width: 940px;
+      margin: 0 auto;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 72px 84px 88px;
+    }
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      padding-bottom: 28px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 54px;
+    }
+    .doc-title {
+      font-size: 46px;
+      line-height: 0.96;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+    }
+    .doc-subtitle {
+      margin-top: 10px;
+      font-size: 16px;
+      line-height: 1.45;
+      color: var(--ink-3);
+      max-width: 440px;
+    }
+    .doc-meta {
+      text-align: right;
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      color: var(--ink-4);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.8;
+    }
+    .section {
+      margin-bottom: 56px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .section-num {
+      min-width: 28px;
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      color: var(--ink-4);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+    .body-text {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--ink-2);
+    }
+    .body-text p { margin: 0; }
+    .body-text p + p { margin-top: 12px; }
+    .body-text strong { color: var(--ink); }
+    .lede {
+      border-left: 2px solid #eceef2;
+      padding-left: 24px;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    .label {
+      font-family: "DM Mono", monospace;
+      font-size: 10.5px;
+      color: var(--ink-4);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .dot-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .dot-list li {
+      position: relative;
+      padding: 9px 0 9px 16px;
+      border-bottom: 1px solid #f0f1f4;
+      color: var(--ink-2);
+      font-size: 13.5px;
+      line-height: 1.65;
+    }
+    .dot-list li:last-child { border-bottom: none; }
+    .dot-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 18px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--ink-4);
+    }
+    .card-surface {
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 30px 32px;
+    }
+    .principles-label {
+      margin-bottom: 22px;
+      font-family: "DM Mono", monospace;
+      font-size: 10.5px;
+      color: var(--ink-4);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .principles-grid,
+    .example-grid,
+    .feedback-grid,
+    .timeline-grid,
+    .mockup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .principle-item,
+    .example-card,
+    .feedback-card,
+    .timeline-card {
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 20px;
+      background: var(--surface);
+    }
+    .example-card { background: var(--blue-soft); border-color: #d9e8f8; }
+    .feedback-card:nth-child(3n+2) { background: var(--surface-2); }
+    .timeline-card:nth-child(2n) { background: var(--amber-soft); }
+    .principle-item h3,
+    .example-card h3,
+    .feedback-card h3,
+    .timeline-card h3,
+    .mockup-text h3,
+    .diagram-block h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .principle-item p,
+    .example-card p,
+    .feedback-card p,
+    .timeline-card p,
+    .mockup-text p {
+      margin: 0;
+      font-size: 12.5px;
+      line-height: 1.66;
+      color: var(--ink-3);
+    }
+    .version {
+      display: block;
+      margin-bottom: 8px;
+      font-family: "DM Mono", monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+    .mockup-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .mockup-text {
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 18px 18px 16px;
+      background: var(--surface);
+      min-height: 124px;
+    }
+    .kicker {
+      display: block;
+      margin-bottom: 10px;
+      font-family: "DM Mono", monospace;
+      font-size: 10px;
+      color: var(--ink-4);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .mockup-frame,
+    .diagram-frame {
+      overflow: hidden;
+      border: 1px solid var(--rule);
+      border-radius: 16px;
+      background: #fff;
+    }
+    .mockup-frame {
+      padding: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: linear-gradient(180deg, #fbfbfc 0%, #f4f5f7 100%);
+    }
+    .mockup-frame img,
+    .diagram-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .mockup-frame img {
+      width: auto;
+      max-width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+    }
+    .diagram-block { margin-bottom: 34px; }
+    .callout {
+      margin-top: 14px;
+      background: var(--blue-soft);
+      border-left: 3px solid var(--blue);
+      color: var(--ink-2);
+      font-size: 13px;
+      line-height: 1.72;
+      padding: 14px 16px;
+      border-radius: 0 10px 10px 0;
+    }
+    .callout strong { color: var(--ink); }
+    .metric-item {
+      border-bottom: 1px solid #f0f1f4;
+      padding: 14px 0;
+    }
+    .metric-item:last-child { border-bottom: none; }
+    .metric-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+    .metric-desc {
+      font-size: 12.5px;
+      color: var(--ink-3);
+      line-height: 1.6;
+    }
+    .doc-footer {
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px solid var(--rule);
+      text-align: center;
+    }
+    .doc-footer p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--ink-3);
+      font-style: italic;
+    }
+    .float-panel {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 20;
+    }
+    .float-tip {
+      width: 230px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 12px;
+      line-height: 1.6;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+    }
+    .float-tip strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity .15s ease;
+    }
+    .btn:hover { opacity: .88; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1.5px solid var(--rule);
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; max-width: none; padding: 56px 64px 64px; }
+      .float-panel { display: none !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+    @media (max-width: 900px) {
+      .doc { padding: 40px 26px 56px; }
+      .doc-header,
+      .two-col,
+      .principles-grid,
+      .example-grid,
+      .feedback-grid,
+      .timeline-grid,
+      .mockup-grid {
+        grid-template-columns: 1fr;
+      }
+      .doc-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .doc-meta { text-align: left; }
+      .float-panel { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="doc">
+    <header class="doc-header">
+      <div>
+        <div class="doc-title">Help Me Choose</div>
+        <div class="doc-subtitle">Apple Ecosystem Advisory Recommendation Tool</div>
+      </div>
+      <div class="doc-meta">
+        Product Requirements Document<br>
+        Portfolio Edition
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <span class="section-title">Executive Summary</span>
+        <div class="section-rule"></div>
+      </div>
+      <div class="body-text lede">
+        <p><strong>Help Me Choose</strong> 是一款面向 Apple 线上选购场景的顾问式决策工具。它通过少量高价值问题，帮助用户从“我已经知道要买哪条产品线”过渡到“我可以更有把握地锁定具体 SKU”。</p>
+        <p>项目并不是对传统参数对比页的平移，而是尝试以更接近顾问的方式，输出包含<strong>主推款、备选方案、推荐原因 (Why) 与配件联动</strong>的完整决策结果。核心目标是降低认知负荷与选择焦虑，并缩短探索到购买的路径。</p>
+      </div>
+    </section>
+
+    <section class="two-col section" style="margin-bottom:40px;">
+      <div>
+        <div class="label">The Problem</div>
+        <ul class="dot-list">
+          <li>Apple 官网的问题不是信息不够，而是<strong>决策路径不清晰</strong>。</li>
+          <li>传统参数对比页很难回答用户最在意的问题：“<strong>为什么是这款，而不是另一款？</strong>”</li>
+          <li>预算敏感型用户容易产生“系统默认在把我往更贵方案推”的防御心理。</li>
+        </ul>
+      </div>
+      <div>
+        <div class="label">Target Audience</div>
+        <ul class="dot-list">
+          <li><strong>核心画像：</strong>18–35 岁，具备 Apple 购买意图，但在型号决策上犹豫的用户。</li>
+          <li><strong>重点覆盖：</strong>首次生态入门用户、跨代升级用户、预算高度敏感用户。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card-surface">
+      <div class="principles-label">Product Design Principles</div>
+      <div class="principles-grid">
+        <div class="principle-item">
+          <h3>少题高价值 (High ROI Questions)</h3>
+          <p>避免冗长问卷，每一道问题都必须对最终 SKU 的收敛产生真实影响。</p>
+        </div>
+        <div class="principle-item">
+          <h3>心态优先于价格 (Mindset &gt; Price)</h3>
+          <p>先识别购买心态与硬需求，再引入预算维度，降低“被推销”的主观感受。</p>
+        </div>
+        <div class="principle-item">
+          <h3>品类专属链路 (Category Customization)</h3>
+          <p>iPhone / MacBook / AirPods 采用不同决策路径，而不是套用同一套模板。</p>
+        </div>
+        <div class="principle-item">
+          <h3>决策可解释性 (Explainable Output)</h3>
+          <p>结果页不仅展示商品，还必须明确说明推荐动因，让结果更可信。</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <span class="section-title">Key Interface Nodes</span>
+        <div class="section-rule"></div>
+      </div>
+
+      <div class="mockup-grid">
+        <div class="mockup-cell">
+          <div class="mockup-text">
+            <span class="kicker">Mockup 01</span>
+            <h3>欢迎页</h3>
+            <p>以一句明确的价值主张和一个强 CTA 降低进入门槛，让用户快速理解这是一个帮助选对款的工具，而不是参数列表。</p>
+          </div>
+          <div class="mockup-frame">
+            <img src="help_me_choose_assets/Mockup_1_Welcome.png" alt="Mockup 1 Welcome">
+          </div>
+        </div>
+
+        <div class="mockup-cell">
+          <div class="mockup-text">
+            <span class="kicker">Mockup 02</span>
+            <h3>品类选择</h3>
+            <p>不替用户做宽泛决定，而是确认其已知起点。这一设计减少了“我明明已经想买 iPhone，你却还在问我要不要买手机”的无效摩擦。</p>
+          </div>
+          <div class="mockup-frame">
+            <img src="help_me_choose_assets/Mockup_2_Step1.png" alt="Mockup 2 Step 1">
+          </div>
+        </div>
+
+        <div class="mockup-cell">
+          <div class="mockup-text">
+            <span class="kicker">Mockup 03</span>
+            <h3>升级顾问问题</h3>
+            <p>通过“你现在在用什么手机”切入 iPhone 路径，使系统从预算筛选器转向更符合真实心智的升级顾问逻辑。</p>
+          </div>
+          <div class="mockup-frame">
+            <img src="help_me_choose_assets/Mockup_3_Step2.png" alt="Mockup 3 Step 2">
+          </div>
+        </div>
+
+        <div class="mockup-cell">
+          <div class="mockup-text">
+            <span class="kicker">Mockup 04</span>
+            <h3>结果页闭环</h3>
+            <p>结果页同时输出主推、备选、搭配建议与下一步动作，用于完成最后的决策确认，而不是把问题重新交回商品详情页。</p>
+          </div>
+          <div class="mockup-frame">
+            <img src="help_me_choose_assets/Mockup_4_Result_Long.png" alt="Mockup 4 Result Long">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">03</span>
+        <span class="section-title">Core Logic &amp; Architecture</span>
+        <div class="section-rule"></div>
+      </div>
+
+      <div class="diagram-block">
+        <h3>A. 推荐逻辑框架 (Recommendation Logic)</h3>
+        <div class="diagram-frame">
+          <img src="help_me_choose_assets/diagram_logic.png" alt="Recommendation Logic Diagram">
+        </div>
+        <div class="callout">
+          <strong>Key Takeaway：</strong>系统的推荐逻辑并不是“预算越高越往上推”，而是先排除明显不适合的选项，再按品类进入更符合真实决策心智的路径，最后通过 trade-off 逻辑生成主推与备选。
+        </div>
+
+        <div class="example-grid" style="margin-top:18px;">
+          <div class="example-card">
+            <h3>Example 01｜首次入门 + 控制预算</h3>
+            <p><strong>输入：</strong>Android / 第一次用 iPhone + 想先进入苹果生态 + 控制预算</p>
+            <p><strong>输出：</strong>iPhone 16 128GB 作为主推；原因不在于“最低配”，而在于“进入生态的最稳妥入口”。</p>
+          </div>
+          <div class="example-card">
+            <h3>Example 02｜升级用户 + 想换更明显体验</h3>
+            <p><strong>输入：</strong>iPhone 14–15 Pro 用户 + 希望获得更明显升级感 + 愿意一步到位</p>
+            <p><strong>输出：</strong>更高阶路径优先，重点考察续航、大屏与完整体验，而不是机械地回到标准版。</p>
+          </div>
+          <div class="example-card">
+            <h3>Example 03｜AirPods 的硬需求优先</h3>
+            <p><strong>输入：</strong>用户连续表达“降噪”诉求</p>
+            <p><strong>输出：</strong>系统必须让降噪能力拥有更高优先级，避免普通款出现在主推位。</p>
+          </div>
+          <div class="example-card">
+            <h3>Example 04｜中间档不是妥协，而是自然答案</h3>
+            <p><strong>输入：</strong>想要更大屏、更长续航，但不想直接上 Pro</p>
+            <p><strong>输出：</strong>Plus 路径存在的意义，是提供一个真实、合理的中间档选择。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="diagram-block">
+        <h3>B. 结果页信息层级 (Result Page Structure)</h3>
+        <div class="diagram-frame">
+          <img src="help_me_choose_assets/diagram_results.png" alt="Result Page Structure Diagram">
+        </div>
+        <div class="callout">
+          <strong>Key Takeaway：</strong>结果页承担的是决策收拢，而不是商品展示。Why 文案负责建立信任，备选款提供理性退路，配件区承接完整方案与商业价值，CTA 则支持进一步比较、保存与确认。
+        </div>
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">04</span>
+        <span class="section-title">User Feedback &amp; Key Insights</span>
+        <div class="section-rule"></div>
+      </div>
+      <div class="feedback-grid">
+        <div class="feedback-card">
+          <h3>“怎么总是推同一台？”</h3>
+          <p>首轮测试中，最直接的反馈是系统过于容易给出“Apple 体系内的默认答案”，而没有先理解用户这次究竟想怎么花这笔钱。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>设计动作：加入预算状态 / 购买心态</h3>
+          <p>V3 引入“控制预算 / 中间档 / 愿意多花 / 一步到位”等选项，使预算敏感型用户能够显式表达自己的购买方式。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>“iPhone 的关键不是预算，而是值不值得换。”</h3>
+          <p>后续反馈进一步指出，用户在 iPhone 上更关心“我现在用什么”“为什么要换”“这次升级值不值”，而不是单纯价格区间。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>设计动作：从预算筛选器转向升级顾问</h3>
+          <p>iPhone 路径逐步演进为“当前机型 → 换机原因 → 购买方式”，这也是整个项目差异化最明确的一次升级。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>“连续选降噪，却给我推普通款。”</h3>
+          <p>AirPods 测试暴露出一个典型问题：预算权重不应该压过强需求，尤其是降噪这种明确功能诉求。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>设计动作：强需求提权</h3>
+          <p>后续逻辑明确将降噪、尺寸、续航、影像等强需求前置，从根源上减少“系统并不理解我”的感受。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">05</span>
+        <span class="section-title">Version Evolution</span>
+        <div class="section-rule"></div>
+      </div>
+      <div class="diagram-frame" style="margin-bottom:18px;">
+        <img src="help_me_choose_assets/diagram_versions.png" alt="Version Evolution Diagram">
+      </div>
+      <div class="timeline-grid">
+        <div class="timeline-card">
+          <span class="version">V1</span>
+          <h3>最小可运行原型</h3>
+          <p>完成欢迎页、问卷与结果页闭环，证明这一方向可以被演示、被讨论、被继续迭代。</p>
+        </div>
+        <div class="timeline-card">
+          <span class="version">V3</span>
+          <h3>预算状态成为显式变量</h3>
+          <p>加入预算状态后，系统不再只输出体系内的“稳妥标准答案”，而开始识别不同用户的购买心态。</p>
+        </div>
+        <div class="timeline-card">
+          <span class="version">V5–V6</span>
+          <h3>iPhone 升级顾问成型</h3>
+          <p>iPhone 从统一预算筛选升级为更接近真实换机决策的顾问路径，并单独处理首次入门用户。</p>
+        </div>
+        <div class="timeline-card">
+          <span class="version">V7–V8.2</span>
+          <h3>SKU 语义与中间档修正</h3>
+          <p>项目开始统一在售 SKU 与历史参考方案的表达，并引入更自然的中间档路径，使结果更贴近真实购买逻辑。</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:18px;">
+        <strong>Evolution Summary：</strong>这个项目的价值不只在于最终页面完成度，而在于每一轮迭代都更接近真实用户的选择逻辑：先修问题定义，再修规则结构，最后修商品语义与 trade-off 表达。
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">06</span>
+        <span class="section-title">Metrics &amp; Capability Signal</span>
+        <div class="section-rule"></div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="label">Success Metrics</div>
+          <div class="metric-item">
+            <div class="metric-name">Guided Flow Completion Rate</div>
+            <div class="metric-desc">从进入问卷到到达结果页的完成率，用于判断流程是否顺畅。</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Recommendation CTR</div>
+            <div class="metric-desc">点击查看主推商品详情的比例，用于衡量推荐结果是否足够有吸引力。</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Accessory Attach Rate</div>
+            <div class="metric-desc">联动配件区的点击率，用于衡量完整方案对商业价值的贡献。</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Compare Click-through Rate</div>
+            <div class="metric-desc">点击“对比主推与备选”的比例，用于观察用户仍有多大不确定性。</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-name">Restart Rate</div>
+            <div class="metric-desc">点击“重新来过”的比例，用于判断推荐是否常常偏离用户预期。</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="label">Product Capabilities Reflected In This PRD</div>
+          <ul class="dot-list">
+            <li><strong>问题定义能力：</strong>抓住“已知品类、未知型号”的真实线上决策痛点。</li>
+            <li><strong>产品抽象能力：</strong>把复杂商品矩阵收敛成少量高价值问题与规则结构。</li>
+            <li><strong>反馈迭代能力：</strong>根据真实试用反馈持续修改规则，而不是停留在页面优化层面。</li>
+            <li><strong>Trade-off 能力：</strong>平衡预算、硬需求、升级价值与商业目标，而非默认推荐最贵方案。</li>
+            <li><strong>表达能力：</strong>把推荐结果写成可解释、可信的 Why 文案，而不是纯参数列表。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-num">07</span>
+        <span class="section-title">Next Steps</span>
+        <div class="section-rule"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card-surface">
+          <div class="label" style="margin-bottom:12px;">Roadmap</div>
+          <ul class="dot-list">
+            <li><strong>继续细化 iPhone 升级树：</strong>把“当前机型 → 换机动因”的颗粒度做得更真实。</li>
+            <li><strong>优化中间档推荐：</strong>为 Plus 与同系列低存储版本建立更自然的进入路径。</li>
+            <li><strong>统一 SKU 语义：</strong>在当前在售与历史参考方案之间保持一致表达。</li>
+            <li><strong>继续扩大外部测试：</strong>重点观察首次入门用户与预算敏感用户的理解路径。</li>
+          </ul>
+        </div>
+
+        <div class="card-surface">
+          <div class="label" style="margin-bottom:12px;">Closing View</div>
+          <div class="body-text">
+            <p>Help Me Choose 的核心价值不在于覆盖所有商品，而在于系统是否真正理解了用户的犹豫与取舍。</p>
+            <p>这个项目最重要的，并不是给用户一个答案，而是让用户相信：<strong>为什么这个答案适合自己</strong>。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="doc-footer">
+      <p>Portfolio-oriented product document focused on decision logic, iteration depth, and explainable recommendation design.</p>
+    </div>
+  </div>
+
+  <div class="float-panel">
+    <div class="float-tip">
+      <strong>导出建议</strong>
+      用浏览器打开后选择“打印”，导出 PDF 时勾选背景图形，版式会更完整。
+    </div>
+    <button class="btn btn-primary" onclick="window.print()">打印 / 另存为 PDF</button>
+    <button class="btn btn-secondary" onclick="downloadHTML()">下载 HTML 源码</button>
+  </div>
+
+  <script>
+    function downloadHTML() {
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Claude-HelpMeChoose_PRD_Portfolio_Exec.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+
+
+
+</body></html>
